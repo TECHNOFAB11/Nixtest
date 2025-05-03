@@ -52,6 +52,7 @@
             }
             {
               name = "fail";
+              pos = __curPos;
               expected = 0;
               actual = "meow";
             }
@@ -61,11 +62,20 @@
               pos = __curPos;
               actual = "test";
             }
+            {
+              name = "test-snapshot-drv";
+              type = "snapshot";
+              pos = __curPos;
+              actualDrv = pkgs.runCommand "test-snapshot" {} ''
+                echo '"snapshot drv"' > $out
+              '';
+            }
           ];
           "other-suite" = [
             {
               name = "obj-snapshot";
               type = "snapshot";
+              pos = __curPos;
               actual = {hello = "world";};
             }
             {

@@ -88,8 +88,17 @@ func runTest(spec TestSpec) TestResult {
 	var actual any
 	var expected any
 
-	if spec.Type == "snapshot" {
+	if spec.ActualDrv != "" {
+		var err error
+		actual, err = buildAndParse(spec.ActualDrv)
+		if err != nil {
+			result.Error = fmt.Sprintf("[system] failed to parse drv output: %v", err.Error())
+			goto end
+		}
+	} else {
 		actual = spec.Actual
+	}
+	if spec.Type == "snapshot" {
 		filePath := path.Join(
 			*snapshotDir,
 			fmt.Sprintf("%s.snap.json", strings.ToLower(spec.Name)),
@@ -111,16 +120,6 @@ func runTest(spec TestSpec) TestResult {
 			goto end
 		}
 	} else if spec.Type == "unit" {
-		if spec.ActualDrv != "" {
-			var err error
-			actual, err = buildAndParse(spec.ActualDrv)
-			if err != nil {
-				result.Error = fmt.Sprintf("[system] failed to parse drv output: %v", err.Error())
-				goto end
-			}
-		} else {
-			actual = spec.Actual
-		}
 		expected = spec.Expected
 	} else {
 		log.Panic().Str("type", spec.Type).Msg("Invalid test type")
