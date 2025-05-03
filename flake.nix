@@ -68,6 +68,16 @@
               type = "snapshot";
               actual = {hello = "world";};
             }
+            {
+              name = "test-drv";
+              pos = __curPos;
+              expected = {a = "b";};
+              actualDrv = pkgs.runCommand "test-something" {} ''
+                echo "Simulating taking some time"
+                sleep 1
+                echo '{"a":"b"}' > $out
+              '';
+            }
           ];
         };
 
