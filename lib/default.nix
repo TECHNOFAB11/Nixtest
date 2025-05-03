@@ -1,4 +1,9 @@
-{pkgs, ...}: {
+{
+  pkgs,
+  lib ? pkgs.lib,
+  self ? "",
+  ...
+}: {
   mkTest = {
     type ? "unit",
     name,
@@ -7,13 +12,15 @@
     actual ? null,
     actualDrv ? null,
     pos ? null,
-  }: {
+  }: let
+    fileRelative = lib.removePrefix ((toString self) + "/") pos.file;
+  in {
     inherit type name description expected actual;
     actualDrv = actualDrv.drvPath or "";
     pos =
       if pos == null
       then ""
-      else "${pos.file}:${toString pos.line}:${toString pos.column}";
+      else "${fileRelative}:${toString pos.line}:${toString pos.column}";
   };
   mkSuite = name: tests: {
     inherit name tests;

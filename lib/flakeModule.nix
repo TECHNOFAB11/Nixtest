@@ -1,6 +1,7 @@
 {
   flake-parts-lib,
   lib,
+  self,
   ...
 }: let
   inherit (lib) mkOption types;
@@ -11,7 +12,7 @@ in {
       pkgs,
       ...
     }: let
-      nixtests-lib = import ./. {inherit pkgs;};
+      nixtests-lib = import ./. {inherit pkgs self;};
     in {
       options.testSuites = mkOption {
         type = types.attrsOf (types.listOf types.attrs);
