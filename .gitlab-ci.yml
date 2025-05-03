@@ -1,0 +1,4 @@
+include:
+  - component: gitlab.com/TECHNOFAB/nix-gitlab-ci/nix-gitlab-ci@2.0.0
+    inputs:
+      version: 2.0.0

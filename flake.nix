@@ -8,6 +8,7 @@
       imports = [
         inputs.devenv.flakeModule
         inputs.treefmt-nix.flakeModule
+        inputs.nix-gitlab-ci.flakeModule
         ./lib/flakeModule.nix
       ];
       systems = import systems;
@@ -70,6 +71,23 @@
           ];
         };
 
+        ci = {
+          stages = ["test"];
+          jobs = {
+            "test" = {
+              stage = "test";
+              script = [
+                "nix run .#nixtests:run -- --junit=junit.xml"
+              ];
+              allow_failure = true;
+              artifacts = {
+                when = "always";
+                reports.junit = "junit.xml";
+              };
+            };
+          };
+        };
+
         packages.default = pkgs.callPackage ./package.nix {};
       };
     };
@@ -82,6 +100,7 @@
     systems.url = "github:nix-systems/default-linux";
     devenv.url = "github:cachix/devenv";
     treefmt-nix.url = "github:numtide/treefmt-nix";
+    nix-gitlab-ci.url = "gitlab:TECHNOFAB/nix-gitlab-ci/2.0.0?dir=lib";
   };
 
   nixConfig = {
