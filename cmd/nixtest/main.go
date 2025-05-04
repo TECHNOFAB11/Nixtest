@@ -47,11 +47,11 @@ type TestResult struct {
 
 type Results map[string][]TestResult
 
-func buildAndParse(variable string) (any, error) {
+func buildAndParse(derivation string) (any, error) {
 	cmd := exec.Command(
 		"nix",
 		"build",
-		variable+"^*",
+		derivation+"^*",
 		"--print-out-paths",
 		"--no-link",
 	)
