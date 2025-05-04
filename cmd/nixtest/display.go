@@ -8,20 +8,23 @@ import (
 	"github.com/jedib0t/go-pretty/v6/table"
 	"github.com/jedib0t/go-pretty/v6/text"
 	"github.com/rs/zerolog/log"
+	"github.com/sergi/go-diff/diffmatchpatch"
 )
 
 func printErrors(results Results) {
 	for _, suiteResults := range results {
 		for _, result := range suiteResults {
-			if result.Success {
+			if result.Status == StatusSuccess || result.Status == StatusSkipped {
 				continue
 			}
-			fmt.Println(text.FgRed.Sprintf("⚠ Test \"%s\" failed:", result.Name))
+			fmt.Println(text.FgRed.Sprintf("⚠ Test \"%s\" failed:", result.Spec.Name))
 			var message string
-			if result.Error.Diff != "" {
-				message = fmt.Sprintf("Diff:\n%s", result.Error.Diff)
+			if result.Status == StatusFailure {
+				dmp := diffmatchpatch.New()
+				diffs := dmp.DiffMain(result.Expected, result.Actual, false)
+				message = fmt.Sprintf("Diff:\n%s", dmp.DiffPrettyText(diffs))
 			} else {
-				message = result.Error.Message
+				message = result.ErrorMessage
 			}
 			for line := range strings.Lines(message) {
 				fmt.Printf("%s %s", text.FgRed.Sprint("|"), line)
@@ -47,7 +50,7 @@ func printSummary(results Results, successCount int, totalCount int) {
 		suiteSuccess := 0
 
 		for _, res := range suiteResults {
-			if res.Success {
+			if res.Status == StatusSuccess || res.Status == StatusSkipped {
 				suiteSuccess++
 			}
 		}
@@ -60,15 +63,19 @@ func printSummary(results Results, successCount int, totalCount int) {
 		})
 		for _, res := range suiteResults {
 			symbol := "❌"
-			if res.Success {
+			if res.Status == StatusSuccess {
 				symbol = "✅"
+			} else if res.Status == StatusError {
+				symbol = "error"
+			} else if res.Status == StatusSkipped {
+				symbol = "skipped"
 			}
 
 			t.AppendRow([]any{
-				res.Name,
+				res.Spec.Name,
 				fmt.Sprintf("%s", res.Duration),
 				symbol,
-				res.Pos,
+				res.Spec.Pos,
 			})
 		}
 		t.AppendSeparator()

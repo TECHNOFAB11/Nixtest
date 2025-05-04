@@ -9,13 +9,13 @@ import (
 	"os/exec"
 	"path"
 	"reflect"
+	"regexp"
 	"strings"
 	"sync"
 	"time"
 
 	"github.com/rs/zerolog"
 	"github.com/rs/zerolog/log"
-	"github.com/sergi/go-diff/diffmatchpatch"
 	flag "github.com/spf13/pflag"
 )
 
@@ -36,13 +36,22 @@ type TestSpec struct {
 	Suite string
 }
 
+type TestStatus int
+
+const (
+	StatusSuccess TestStatus = iota
+	StatusFailure
+	StatusError
+	StatusSkipped
+)
+
 type TestResult struct {
-	Name     string
-	Success  bool
-	Error    TestResultError
-	Duration time.Duration
-	Pos      string
-	Suite    string
+	Spec         TestSpec
+	Status       TestStatus
+	Duration     time.Duration
+	ErrorMessage string
+	Expected     string
+	Actual       string
 }
 
 type Results map[string][]TestResult
@@ -80,13 +89,6 @@ func buildAndParse(derivation string) (any, error) {
 	return result, nil
 }
 
-type TestResultError struct {
-	Message  string
-	Expected string
-	Actual   string
-	Diff     string
-}
-
 func PrefixLines(input string) string {
 	lines := strings.Split(input, "\n")
 	for i := range lines {
@@ -95,14 +97,29 @@ func PrefixLines(input string) string {
 	return strings.Join(lines, "\n")
 }
 
+func shouldSkip(input string, pattern string) bool {
+	if pattern == "" {
+		return false
+	}
+
+	regex, err := regexp.Compile(pattern)
+	if err != nil {
+		log.Panic().Err(err).Msg("failed to compile skip regex")
+	}
+
+	return regex.MatchString(input)
+}
+
 func runTest(spec TestSpec) TestResult {
 	startTime := time.Now()
 	result := TestResult{
-		Name:    spec.Name,
-		Pos:     spec.Pos,
-		Suite:   spec.Suite,
-		Success: false,
-		Error:   TestResultError{},
+		Spec:   spec,
+		Status: StatusSuccess,
+	}
+
+	if shouldSkip(spec.Name, *skipPattern) {
+		result.Status = StatusSkipped
+		return result
 	}
 
 	var actual any
@@ -112,7 +129,8 @@ func runTest(spec TestSpec) TestResult {
 		var err error
 		actual, err = buildAndParse(spec.ActualDrv)
 		if err != nil {
-			result.Error.Message = fmt.Sprintf("[system] failed to parse drv output: %v", err.Error())
+			result.Status = StatusError
+			result.ErrorMessage = fmt.Sprintf("[system] failed to parse drv output: %v", err.Error())
 			goto end
 		}
 	} else {
@@ -129,14 +147,16 @@ func runTest(spec TestSpec) TestResult {
 		}
 
 		if _, err := os.Stat(filePath); errors.Is(err, os.ErrNotExist) {
-			result.Error.Message = "No Snapshot exists yet"
+			result.Status = StatusError
+			result.ErrorMessage = "No Snapshot exists yet"
 			goto end
 		}
 
 		var err error
 		expected, err = ParseFile[any](filePath)
 		if err != nil {
-			result.Error.Message = fmt.Sprintf("[system] failed to parse snapshot: %v", err.Error())
+			result.Status = StatusError
+			result.ErrorMessage = fmt.Sprintf("[system] failed to parse snapshot: %v", err.Error())
 			goto end
 		}
 	} else if spec.Type == "unit" {
@@ -146,28 +166,24 @@ func runTest(spec TestSpec) TestResult {
 	}
 
 	if reflect.DeepEqual(actual, expected) {
-		result.Success = true
+		result.Status = StatusSuccess
 	} else {
-		dmp := diffmatchpatch.New()
 		text1, err := json.MarshalIndent(expected, "", "  ")
 		if err != nil {
-			result.Error.Message = fmt.Sprintf("[system] failed to json marshal 'expected': %v", err.Error())
+			result.Status = StatusError
+			result.ErrorMessage = fmt.Sprintf("[system] failed to json marshal 'expected': %v", err.Error())
 			goto end
 		}
 		text2, err := json.MarshalIndent(actual, "", "  ")
 		if err != nil {
-			result.Error.Message = fmt.Sprintf("[system] failed to json marshal 'actual': %v", err.Error())
+			result.Status = StatusError
+			result.ErrorMessage = fmt.Sprintf("[system] failed to json marshal 'actual': %v", err.Error())
 			goto end
 		}
-		diffs := dmp.DiffMain(string(text1), string(text2), false)
-		result.Error.Expected = string(text1)
-		result.Error.Actual = string(text2)
-		result.Error.Diff = dmp.DiffPrettyText(diffs)
-		result.Error.Message = fmt.Sprintf(
-			"Expected:\n%s\nGot:\n%s",
-			PrefixLines(string(text1)),
-			PrefixLines(string(text2)),
-		)
+
+		result.Status = StatusFailure
+		result.Expected = string(text1)
+		result.Actual = string(text2)
 	}
 
 end:
@@ -211,7 +227,8 @@ var (
 	junitPath *string = flag.String(
 		"junit", "", "Path to generate JUNIT report to, leave empty to disable",
 	)
-	updateSnapshots *bool = flag.Bool("update-snapshots", false, "Update all snapshots")
+	updateSnapshots *bool   = flag.Bool("update-snapshots", false, "Update all snapshots")
+	skipPattern     *string = flag.String("skip", "", "Regular expression to skip (e.g., 'test-.*|.*-b')")
 )
 
 func main() {
@@ -269,8 +286,8 @@ func main() {
 	successCount := 0
 
 	for r := range resultsChan {
-		results[r.Suite] = append(results[r.Suite], r)
-		if r.Success {
+		results[r.Spec.Suite] = append(results[r.Spec.Suite], r)
+		if r.Status == StatusSuccess || r.Status == StatusSkipped {
 			successCount++
 		}
 	}

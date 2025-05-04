@@ -41,54 +41,71 @@
           };
         };
 
-        testSuites = {
-          "suite-one" = [
-            {
-              name = "test-one";
-              # required to figure out file and line, but optional
-              pos = __curPos;
-              expected = 1;
-              actual = 1;
-            }
-            {
-              name = "fail";
-              pos = __curPos;
-              expected = 0;
-              actual = "meow";
-            }
-            {
-              name = "snapshot-test";
-              type = "snapshot";
-              pos = __curPos;
-              actual = "test";
-            }
-            {
-              name = "test-snapshot-drv";
-              type = "snapshot";
-              pos = __curPos;
-              actualDrv = pkgs.runCommand "test-snapshot" {} ''
-                echo '"snapshot drv"' > $out
-              '';
-            }
-          ];
-          "other-suite" = [
-            {
-              name = "obj-snapshot";
-              type = "snapshot";
-              pos = __curPos;
-              actual = {hello = "world";};
-            }
-            {
-              name = "test-drv";
-              pos = __curPos;
-              expected = {a = "b";};
-              actualDrv = pkgs.runCommand "test-something" {} ''
-                echo "Simulating taking some time"
-                sleep 1
-                echo '{"a":"b"}' > $out
-              '';
-            }
-          ];
+        nixtest = {
+          skip = "skip.*d";
+          suites = {
+            "suite-one" = [
+              {
+                name = "test-one";
+                # required to figure out file and line, but optional
+                pos = __curPos;
+                expected = 1;
+                actual = 1;
+              }
+              {
+                name = "fail";
+                pos = __curPos;
+                expected = 0;
+                actual = "meow";
+              }
+              {
+                name = "snapshot-test";
+                type = "snapshot";
+                pos = __curPos;
+                actual = "test";
+              }
+              {
+                name = "test-snapshot-drv";
+                type = "snapshot";
+                pos = __curPos;
+                actualDrv = pkgs.runCommand "test-snapshot" {} ''
+                  echo '"snapshot drv"' > $out
+                '';
+              }
+              {
+                name = "test-error-drv";
+                pos = __curPos;
+                expected = null;
+                actualDrv = pkgs.runCommand "test-error-drv" {} ''
+                  exit 1
+                '';
+              }
+            ];
+            "other-suite" = [
+              {
+                name = "obj-snapshot";
+                type = "snapshot";
+                pos = __curPos;
+                actual = {hello = "world";};
+              }
+              {
+                name = "test-drv";
+                pos = __curPos;
+                expected = {a = "b";};
+                actualDrv = pkgs.runCommand "test-something" {} ''
+                  echo "Simulating taking some time"
+                  sleep 1
+                  echo '{"a":"b"}' > $out
+                '';
+              }
+              {
+                name = "skipped";
+                pos = __curPos;
+                expected = null;
+                actual = null;
+              }
+            ];
+          };
         };
 
         ci = {

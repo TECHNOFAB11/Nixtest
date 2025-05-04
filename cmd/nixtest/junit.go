@@ -13,6 +13,8 @@ type JUnitReport struct {
 	Name     string           `xml:"name,attr"`
 	Tests    int              `xml:"tests,attr"`
 	Failures int              `xml:"failures,attr"`
+	Errors   int              `xml:"errors,attr"`
+	Skipped  int              `xml:"skipped,attr"`
 	Time     string           `xml:"time,attr"` // in seconds
 	Suites   []JUnitTestSuite `xml:"testsuite"`
 }
@@ -22,6 +24,8 @@ type JUnitTestSuite struct {
 	Name      string      `xml:"name,attr"`
 	Tests     int         `xml:"tests,attr"`
 	Failures  int         `xml:"failures,attr"`
+	Errors    int         `xml:"errors,attr"`
+	Skipped   int         `xml:"skipped,attr"`
 	Time      string      `xml:"time,attr"` // in seconds
 	TestCases []JUnitCase `xml:"testcase"`
 }
@@ -34,6 +38,7 @@ type JUnitCase struct {
 	Line      string  `xml:"line,attr,omitempty"`
 	Failure   *string `xml:"failure,omitempty"`
 	Error     *string `xml:"error,omitempty"`
+	Skipped   *string `xml:"skipped,omitempty"`
 }
 
 func GenerateJUnitReport(name string, results Results) (string, error) {
@@ -41,6 +46,8 @@ func GenerateJUnitReport(name string, results Results) (string, error) {
 		Name:     name,
 		Tests:    0,
 		Failures: 0,
+		Errors:   0,
+		Skipped:  0,
 		Suites:   []JUnitTestSuite{},
 	}
 
@@ -51,6 +58,8 @@ func GenerateJUnitReport(name string, results Results) (string, error) {
 			Name:      suiteName,
 			Tests:     len(suiteResults),
 			Failures:  0,
+			Errors:    0,
+			Skipped:   0,
 			TestCases: []JUnitCase{},
 		}
 
@@ -62,21 +71,35 @@ func GenerateJUnitReport(name string, results Results) (string, error) {
 			suiteDuration += result.Duration
 
 			testCase := JUnitCase{
-				Name:      result.Name,
+				Name:      result.Spec.Name,
 				Classname: suiteName, // Use suite name as classname
 				Time:      durationSeconds,
 			}
 
-			if result.Pos != "" {
-				pos := strings.Split(result.Pos, ":")
+			if result.Spec.Pos != "" {
+				pos := strings.Split(result.Spec.Pos, ":")
 				testCase.File = pos[0]
 				testCase.Line = pos[1]
 			}
 
-			if !result.Success {
+			if result.Status == StatusFailure {
 				suite.Failures++
 				report.Failures++
-				testCase.Failure = &result.Error.Message
+				message := fmt.Sprintf(
+					"Expected:\n%s\nGot:\n%s",
+					PrefixLines(result.Expected),
+					PrefixLines(result.Actual),
+				)
+				testCase.Failure = &message
+			} else if result.Status == StatusError {
+				suite.Errors++
+				report.Errors++
+				testCase.Error = &result.ErrorMessage
+			} else if result.Status == StatusSkipped {
+				suite.Skipped++
+				report.Skipped++
+				skipped := ""
+				testCase.Skipped = &skipped
 			}
 
 			suite.TestCases = append(suite.TestCases, testCase)
