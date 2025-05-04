@@ -16,7 +16,8 @@
     fileRelative = lib.removePrefix ((toString self) + "/") pos.file;
   in {
     inherit type name description expected actual;
-    actualDrv = actualDrv.drvPath or "";
+    # discard string context, otherwise it's being built instantly which we don't want
+    actualDrv = builtins.unsafeDiscardStringContext (actualDrv.drvPath or "");
     pos =
       if pos == null
       then ""
