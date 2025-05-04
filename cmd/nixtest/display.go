@@ -17,10 +17,16 @@ func printErrors(results Results) {
 				continue
 			}
 			fmt.Println(text.FgRed.Sprintf("⚠ Test \"%s\" failed:", result.Name))
-			for line := range strings.Lines(result.Error) {
+			var message string
+			if result.Error.Diff != "" {
+				message = fmt.Sprintf("Diff:\n%s", result.Error.Diff)
+			} else {
+				message = result.Error.Message
+			}
+			for line := range strings.Lines(message) {
 				fmt.Printf("%s %s", text.FgRed.Sprint("|"), line)
 			}
-			if result.Error == "" {
+			if message == "" {
 				fmt.Printf("- no output -")
 			}
 			fmt.Printf("\n\n")

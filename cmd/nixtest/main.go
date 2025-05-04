@@ -39,7 +39,7 @@ type TestSpec struct {
 type TestResult struct {
 	Name     string
 	Success  bool
-	Error    string
+	Error    TestResultError
 	Duration time.Duration
 	Pos      string
 	Suite    string
@@ -80,6 +80,21 @@ func buildAndParse(derivation string) (any, error) {
 	return result, nil
 }
 
+type TestResultError struct {
+	Message  string
+	Expected string
+	Actual   string
+	Diff     string
+}
+
+func PrefixLines(input string) string {
+	lines := strings.Split(input, "\n")
+	for i := range lines {
+		lines[i] = "| " + lines[i]
+	}
+	return strings.Join(lines, "\n")
+}
+
 func runTest(spec TestSpec) TestResult {
 	startTime := time.Now()
 	result := TestResult{
@@ -87,7 +102,7 @@ func runTest(spec TestSpec) TestResult {
 		Pos:     spec.Pos,
 		Suite:   spec.Suite,
 		Success: false,
-		Error:   "",
+		Error:   TestResultError{},
 	}
 
 	var actual any
@@ -97,7 +112,7 @@ func runTest(spec TestSpec) TestResult {
 		var err error
 		actual, err = buildAndParse(spec.ActualDrv)
 		if err != nil {
-			result.Error = fmt.Sprintf("[system] failed to parse drv output: %v", err.Error())
+			result.Error.Message = fmt.Sprintf("[system] failed to parse drv output: %v", err.Error())
 			goto end
 		}
 	} else {
@@ -114,14 +129,14 @@ func runTest(spec TestSpec) TestResult {
 		}
 
 		if _, err := os.Stat(filePath); errors.Is(err, os.ErrNotExist) {
-			result.Error = "No Snapshot exists yet"
+			result.Error.Message = "No Snapshot exists yet"
 			goto end
 		}
 
 		var err error
 		expected, err = ParseFile[any](filePath)
 		if err != nil {
-			result.Error = fmt.Sprintf("[system] failed to parse snapshot: %v", err.Error())
+			result.Error.Message = fmt.Sprintf("[system] failed to parse snapshot: %v", err.Error())
 			goto end
 		}
 	} else if spec.Type == "unit" {
@@ -134,18 +149,25 @@ func runTest(spec TestSpec) TestResult {
 		result.Success = true
 	} else {
 		dmp := diffmatchpatch.New()
-		text1, err := json.MarshalIndent(actual, "", "  ")
+		text1, err := json.MarshalIndent(expected, "", "  ")
 		if err != nil {
-			result.Error = fmt.Sprintf("[system] failed to json marshal 'actual': %v", err.Error())
+			result.Error.Message = fmt.Sprintf("[system] failed to json marshal 'expected': %v", err.Error())
 			goto end
 		}
-		text2, err := json.MarshalIndent(expected, "", "  ")
+		text2, err := json.MarshalIndent(actual, "", "  ")
 		if err != nil {
-			result.Error = fmt.Sprintf("[system] failed to json marshal 'expected': %v", err.Error())
+			result.Error.Message = fmt.Sprintf("[system] failed to json marshal 'actual': %v", err.Error())
 			goto end
 		}
 		diffs := dmp.DiffMain(string(text1), string(text2), false)
-		result.Error = fmt.Sprintf("Mismatch:\n%s", dmp.DiffPrettyText(diffs))
+		result.Error.Expected = string(text1)
+		result.Error.Actual = string(text2)
+		result.Error.Diff = dmp.DiffPrettyText(diffs)
+		result.Error.Message = fmt.Sprintf(
+			"Expected:\n%s\nGot:\n%s",
+			PrefixLines(string(text1)),
+			PrefixLines(string(text2)),
+		)
 	}
 
 end:

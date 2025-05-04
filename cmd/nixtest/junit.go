@@ -76,7 +76,7 @@ func GenerateJUnitReport(name string, results Results) (string, error) {
 			if !result.Success {
 				suite.Failures++
 				report.Failures++
-				testCase.Failure = &result.Error
+				testCase.Failure = &result.Error.Message
 			}
 
 			suite.TestCases = append(suite.TestCases, testCase)
