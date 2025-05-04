@@ -1,6 +1,7 @@
 package main
 
 import (
+	"bytes"
 	"encoding/json"
 	"errors"
 	"fmt"
@@ -54,12 +55,16 @@ func buildAndParse(variable string) (any, error) {
 		"--print-out-paths",
 		"--no-link",
 	)
-	output, err := cmd.Output()
+	var stdout, stderr bytes.Buffer
+	cmd.Stdout = &stdout
+	cmd.Stderr = &stderr
+
+	err := cmd.Run()
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("failed to run nix build: %v, %s", err, stderr.String())
 	}
 
-	path := strings.TrimSpace(string(output))
+	path := strings.TrimSpace(stdout.String())
 
 	data, err := os.ReadFile(path)
 	if err != nil {
