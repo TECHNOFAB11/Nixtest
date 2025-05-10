@@ -27,7 +27,7 @@
     pos =
       if pos == null
       then ""
-      else "${fileRelative}:${toString pos.line}:${toString pos.column}";
+      else "${fileRelative}:${toString pos.line}";
   };
   mkSuite = name: tests: {
     inherit name tests;

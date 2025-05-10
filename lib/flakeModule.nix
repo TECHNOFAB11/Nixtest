@@ -23,7 +23,18 @@ in {
               description = "Which tests to skip (regex)";
             };
             suites = mkOption {
-              type = types.attrsOf (types.listOf types.attrs);
+              type = types.attrsOf (types.submodule {
+                options = {
+                  tests = mkOption {
+                    type = types.listOf types.attrs;
+                    default = [];
+                  };
+                  pos = mkOption {
+                    type = types.nullOr types.attrs;
+                    default = null;
+                  };
+                };
+              });
               default = {};
             };
           };
@@ -34,11 +45,17 @@ in {
       config.legacyPackages = rec {
         "nixtests" = let
           suites = map (suiteName: let
-            tests = builtins.getAttr suiteName config.nixtest.suites;
+            suite = builtins.getAttr suiteName config.nixtest.suites;
           in
             nixtests-lib.mkSuite
             suiteName
-            (map (test: nixtests-lib.mkTest test) tests))
+            (map (test:
+              nixtests-lib.mkTest ({
+                  # default pos to suite's pos if given
+                  pos = suite.pos;
+                }
+                // test))
+            suite.tests))
           (builtins.attrNames config.nixtest.suites);
         in
           nixtests-lib.exportSuites suites;
