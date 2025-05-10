@@ -110,6 +110,15 @@ func shouldSkip(input string, pattern string) bool {
 	return regex.MatchString(input)
 }
 
+func isString(value any) bool {
+	switch value.(type) {
+	case string:
+		return true
+	default:
+		return false
+	}
+}
+
 func runTest(spec TestSpec) TestResult {
 	startTime := time.Now()
 	result := TestResult{
@@ -168,22 +177,32 @@ func runTest(spec TestSpec) TestResult {
 	if reflect.DeepEqual(actual, expected) {
 		result.Status = StatusSuccess
 	} else {
-		text1, err := json.MarshalIndent(expected, "", "  ")
-		if err != nil {
-			result.Status = StatusError
-			result.ErrorMessage = fmt.Sprintf("[system] failed to json marshal 'expected': %v", err.Error())
-			goto end
-		}
-		text2, err := json.MarshalIndent(actual, "", "  ")
-		if err != nil {
-			result.Status = StatusError
-			result.ErrorMessage = fmt.Sprintf("[system] failed to json marshal 'actual': %v", err.Error())
-			goto end
+		var text1, text2 string
+
+		// just keep strings as is, only json marshal if any of them is not a string
+		if isString(actual) && isString(expected) {
+			text1 = actual.(string)
+			text2 = expected.(string)
+		} else {
+			bytes1, err := json.MarshalIndent(expected, "", "  ")
+			if err != nil {
+				result.Status = StatusError
+				result.ErrorMessage = fmt.Sprintf("[system] failed to json marshal 'expected': %v", err.Error())
+				goto end
+			}
+			bytes2, err := json.MarshalIndent(actual, "", "  ")
+			if err != nil {
+				result.Status = StatusError
+				result.ErrorMessage = fmt.Sprintf("[system] failed to json marshal 'actual': %v", err.Error())
+				goto end
+			}
+			text1 = string(bytes1)
+			text2 = string(bytes2)
 		}
 
 		result.Status = StatusFailure
-		result.Expected = string(text1)
-		result.Actual = string(text2)
+		result.Expected = text1
+		result.Actual = text2
 	}
 
 end:

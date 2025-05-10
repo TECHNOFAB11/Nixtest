@@ -1,0 +1,1 @@
+"{\n  example = \u003cfunction\u003e;\n  example2 = {\n    drv = \u003cderivation hello-2.12.1\u003e;\n  };\n}"

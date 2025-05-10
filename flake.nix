@@ -77,6 +77,7 @@
                 pos = __curPos;
                 expected = null;
                 actualDrv = pkgs.runCommand "test-error-drv" {} ''
+                  echo "This works, but its better to just write 'fail' to \$out and expect 'success' or sth."
                   exit 1
                 '';
               }
@@ -87,6 +88,17 @@
                 type = "snapshot";
                 pos = __curPos;
                 actual = {hello = "world";};
+              }
+              {
+                name = "pretty-snapshot";
+                type = "snapshot";
+                format = "pretty";
+                actual = {
+                  example = args: {};
+                  example2 = {
+                    drv = pkgs.hello;
+                  };
+                };
               }
               {
                 name = "test-drv";

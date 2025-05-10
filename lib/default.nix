@@ -8,14 +8,20 @@
     type ? "unit",
     name,
     description ? "",
+    format ? "json",
     expected ? null,
     actual ? null,
     actualDrv ? null,
     pos ? null,
   }: let
     fileRelative = lib.removePrefix ((toString self) + "/") pos.file;
+    actual' =
+      if format == "json"
+      then actual
+      else lib.generators.toPretty {} actual;
   in {
-    inherit type name description expected actual;
+    inherit type name description expected;
+    actual = actual';
     # discard string context, otherwise it's being built instantly which we don't want
     actualDrv = builtins.unsafeDiscardStringContext (actualDrv.drvPath or "");
     pos =
