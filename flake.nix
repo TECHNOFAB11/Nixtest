@@ -100,6 +100,13 @@
                 };
               }
               {
+                name = "pretty-unit";
+                format = "pretty";
+                pos = __curPos;
+                expected = pkgs.hello;
+                actual = pkgs.hello;
+              }
+              {
                 name = "test-drv";
                 pos = __curPos;
                 expected = {a = "b";};

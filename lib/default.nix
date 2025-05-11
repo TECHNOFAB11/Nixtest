@@ -19,9 +19,14 @@
       if format == "json"
       then actual
       else lib.generators.toPretty {} actual;
+    expected' =
+      if format == "json"
+      then expected
+      else lib.generators.toPretty {} expected;
   in {
-    inherit type name description expected;
+    inherit type name description;
     actual = actual';
+    expected = expected';
     # discard string context, otherwise it's being built instantly which we don't want
     actualDrv = builtins.unsafeDiscardStringContext (actualDrv.drvPath or "");
     pos =
