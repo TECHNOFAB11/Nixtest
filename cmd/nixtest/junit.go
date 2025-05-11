@@ -6,6 +6,9 @@ import (
 	"os"
 	"strings"
 	"time"
+
+	"github.com/akedrou/textdiff"
+	"github.com/akedrou/textdiff/myers"
 )
 
 type JUnitReport struct {
@@ -85,12 +88,12 @@ func GenerateJUnitReport(name string, results Results) (string, error) {
 			if result.Status == StatusFailure {
 				suite.Failures++
 				report.Failures++
-				message := fmt.Sprintf(
-					"Expected:\n%s\nGot:\n%s",
-					PrefixLines(result.Expected),
-					PrefixLines(result.Actual),
-				)
-				testCase.Failure = &message
+				// FIXME: ComputeEdits deprecated
+				edits := myers.ComputeEdits(result.Expected, result.Actual)
+				diff := fmt.Sprint(textdiff.ToUnified("expected", "actual", result.Expected, edits, 3))
+				// remove newline hint
+				diff = strings.ReplaceAll(diff, "\\ No newline at end of file\n", "")
+				testCase.Failure = &diff
 			} else if result.Status == StatusError {
 				suite.Errors++
 				report.Errors++

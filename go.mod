@@ -3,6 +3,7 @@ module gitlab.com/technofab/testnix
 go 1.24.2
 
 require (
+	github.com/akedrou/textdiff v0.1.0
 	github.com/rs/zerolog v1.34.0
 	github.com/spf13/pflag v1.0.6
 )
@@ -10,7 +11,7 @@ require (
 require (
 	github.com/mattn/go-runewidth v0.0.16 // indirect
 	github.com/rivo/uniseg v0.4.7 // indirect
-	golang.org/x/text v0.22.0 // indirect
+	golang.org/x/text v0.25.0 // indirect
 )
 
 require (
@@ -18,5 +19,5 @@ require (
 	github.com/mattn/go-colorable v0.1.14 // indirect
 	github.com/mattn/go-isatty v0.0.20 // indirect
 	github.com/sergi/go-diff v1.3.1
-	golang.org/x/sys v0.32.0 // indirect
+	golang.org/x/sys v0.33.0 // indirect
 )
