@@ -90,7 +90,10 @@ func GenerateJUnitReport(name string, results Results) (string, error) {
 				report.Failures++
 				// FIXME: ComputeEdits deprecated
 				edits := myers.ComputeEdits(result.Expected, result.Actual)
-				diff := fmt.Sprint(textdiff.ToUnified("expected", "actual", result.Expected, edits, 3))
+				diff, err := textdiff.ToUnified("expected", "actual", result.Expected, edits, 3)
+				if err != nil {
+					return "", err
+				}
 				// remove newline hint
 				diff = strings.ReplaceAll(diff, "\\ No newline at end of file\n", "")
 				testCase.Failure = &diff
