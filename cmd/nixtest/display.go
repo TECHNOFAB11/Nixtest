@@ -2,8 +2,11 @@ package main
 
 import (
 	"fmt"
+	"maps"
 	"os"
 	"regexp"
+	"slices"
+	"sort"
 	"strings"
 
 	"github.com/jedib0t/go-pretty/v6/table"
@@ -67,7 +70,9 @@ func printSummary(results Results, successCount int, totalCount int) {
 
 	log.Info().Msg("Summary:")
 
-	for suite, suiteResults := range results {
+	suitesSorted := slices.Sorted(maps.Keys(results))
+	for _, suite := range suitesSorted {
+		suiteResults := results[suite]
 		suiteTotal := len(suiteResults)
 		suiteSuccess := 0
 
@@ -82,6 +87,9 @@ func printSummary(results Results, successCount int, totalCount int) {
 			"",
 			fmt.Sprintf("%d/%d", suiteSuccess, suiteTotal),
 			"",
+		})
+		sort.Slice(suiteResults, func(i, j int) bool {
+			return suiteResults[i].Spec.Name < suiteResults[j].Spec.Name
 		})
 		for _, res := range suiteResults {
 			symbol := "❌"
