@@ -88,15 +88,19 @@ func GenerateJUnitReport(name string, results Results) (string, error) {
 			if result.Status == StatusFailure {
 				suite.Failures++
 				report.Failures++
-				// FIXME: ComputeEdits deprecated
-				edits := myers.ComputeEdits(result.Expected, result.Actual)
-				diff, err := textdiff.ToUnified("expected", "actual", result.Expected, edits, 3)
-				if err != nil {
-					return "", err
+				if result.ErrorMessage != "" {
+					testCase.Failure = &result.ErrorMessage
+				} else {
+					// FIXME: ComputeEdits deprecated
+					edits := myers.ComputeEdits(result.Expected, result.Actual)
+					diff, err := textdiff.ToUnified("expected", "actual", result.Expected, edits, 3)
+					if err != nil {
+						return "", err
+					}
+					// remove newline hint
+					diff = strings.ReplaceAll(diff, "\\ No newline at end of file\n", "")
+					testCase.Failure = &diff
 				}
-				// remove newline hint
-				diff = strings.ReplaceAll(diff, "\\ No newline at end of file\n", "")
-				testCase.Failure = &diff
 			} else if result.Status == StatusError {
 				suite.Errors++
 				report.Errors++

@@ -19,13 +19,12 @@ func printErrors(results Results) {
 				continue
 			}
 			fmt.Println(text.FgRed.Sprintf("⚠ Test \"%s\" failed:", result.Spec.Name))
-			var message string
-			if result.Status == StatusFailure {
+			var message string = result.ErrorMessage
+			// if ErrorMessage is set, prefer that
+			if result.Status == StatusFailure && message == "" {
 				dmp := diffmatchpatch.New()
 				diffs := dmp.DiffMain(result.Expected, result.Actual, false)
 				message = fmt.Sprintf("Diff:\n%s", dmp.DiffPrettyText(diffs))
-			} else {
-				message = result.ErrorMessage
 			}
 
 			// handle multi-line colored changes

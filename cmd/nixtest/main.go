@@ -212,8 +212,12 @@ func runTest(spec TestSpec) TestResult {
 			result.Status = StatusError
 			result.ErrorMessage = fmt.Sprintf("[system] failed to run script: %v", err.Error())
 		}
-		expected = ""
-		actual = fmt.Sprintf("[exit code %d]\n[Stdout]\n%s\n[Stderr]\n%s", exitCode, stdout.String(), stderr.String())
+		if exitCode != 0 {
+			result.Status = StatusFailure
+			result.ErrorMessage = fmt.Sprintf("[exit code %d]\n[stdout]\n%s\n[stderr]\n%s", exitCode, stdout.String(), stderr.String())
+		}
+		// no need for equality checking with "script"
+		goto end
 	} else {
 		log.Panic().Str("type", spec.Type).Msg("Invalid test type")
 	}
