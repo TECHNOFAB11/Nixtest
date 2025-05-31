@@ -27,11 +27,13 @@ func printErrors(results Results) {
 				message = fmt.Sprintf("Diff:\n%s", dmp.DiffPrettyText(diffs))
 			}
 
+			endedWithNewline := false
 			// handle multi-line colored changes
 			colorState := ""
 			colorRegex := regexp.MustCompile(`\x1b\[[0-9;]*m`) // Match any escape sequence
 			for line := range strings.Lines(message) {
 				coloredLine := colorState + line
+				endedWithNewline = strings.HasSuffix(coloredLine, "\n")
 				fmt.Printf("%s %s", text.FgRed.Sprint("|"), coloredLine)
 
 				matches := colorRegex.FindAllString(line, -1)
@@ -45,6 +47,9 @@ func printErrors(results Results) {
 						colorState = lastMatch // save color state for next line
 					}
 				}
+			}
+			if endedWithNewline {
+				fmt.Printf("%s", text.FgRed.Sprint("|"))
 			}
 			if message == "" {
 				fmt.Printf("- no output -")
