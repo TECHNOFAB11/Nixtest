@@ -32,7 +32,13 @@
     actualDrv = builtins.unsafeDiscardStringContext (actualDrv.drvPath or "");
     script =
       if script != null
-      then builtins.unsafeDiscardStringContext (pkgs.writeShellScript "nixtest-${name}" script).drvPath
+      then
+        builtins.unsafeDiscardStringContext
+        (pkgs.writeShellScript "nixtest-${name}" ''
+          # show which line failed the test
+          set -x
+          ${script}
+        '').drvPath
       else null;
     pos =
       if pos == null
