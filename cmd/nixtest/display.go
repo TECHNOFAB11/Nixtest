@@ -3,6 +3,7 @@ package main
 import (
 	"fmt"
 	"os"
+	"regexp"
 	"strings"
 
 	"github.com/jedib0t/go-pretty/v6/table"
@@ -26,8 +27,25 @@ func printErrors(results Results) {
 			} else {
 				message = result.ErrorMessage
 			}
+
+			// handle multi-line colored changes
+			colorState := ""
+			colorRegex := regexp.MustCompile(`\x1b\[[0-9;]*m`) // Match any escape sequence
 			for line := range strings.Lines(message) {
-				fmt.Printf("%s %s", text.FgRed.Sprint("|"), line)
+				coloredLine := colorState + line
+				fmt.Printf("%s %s", text.FgRed.Sprint("|"), coloredLine)
+
+				matches := colorRegex.FindAllString(line, -1)
+
+				// determine last color code, to copy to next line
+				if len(matches) > 0 {
+					lastMatch := matches[len(matches)-1]
+					if lastMatch == "\x1b[0m" {
+						colorState = "" // reset color state
+					} else {
+						colorState = lastMatch // save color state for next line
+					}
+				}
 			}
 			if message == "" {
 				fmt.Printf("- no output -")
