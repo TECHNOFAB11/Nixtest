@@ -78,6 +78,14 @@
                     exit 1
                   '';
                 }
+                {
+                  name = "test-script";
+                  type = "script";
+                  script = ''
+                    echo Test something here
+                    exit 1
+                  '';
+                }
               ];
             };
             "other-suite".tests = [

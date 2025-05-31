@@ -31,6 +31,7 @@ type TestSpec struct {
 	Expected    any    `json:"expected,omitempty"`
 	Actual      any    `json:"actual,omitempty"`
 	ActualDrv   string `json:"actualDrv,omitempty"`
+	Script      string `json:"script,omitempty"`
 	Pos         string `json:"pos,omitempty"`
 
 	Suite string
@@ -56,7 +57,7 @@ type TestResult struct {
 
 type Results map[string][]TestResult
 
-func buildAndParse(derivation string) (any, error) {
+func buildDerivation(derivation string) (string, error) {
 	cmd := exec.Command(
 		"nix",
 		"build",
@@ -70,10 +71,18 @@ func buildAndParse(derivation string) (any, error) {
 
 	err := cmd.Run()
 	if err != nil {
-		return nil, fmt.Errorf("failed to run nix build: %v, %s", err, stderr.String())
+		return "", fmt.Errorf("failed to run nix build: %v, %s", err, stderr.String())
 	}
 
 	path := strings.TrimSpace(stdout.String())
+	return path, nil
+}
+
+func buildAndParse(derivation string) (any, error) {
+	path, err := buildDerivation(derivation)
+	if err != nil {
+		return nil, err
+	}
 
 	data, err := os.ReadFile(path)
 	if err != nil {
@@ -87,6 +96,33 @@ func buildAndParse(derivation string) (any, error) {
 	}
 
 	return result, nil
+}
+
+// builds derivation and runs it
+func buildAndRun(derivation string) (exitCode int, stdout bytes.Buffer, stderr bytes.Buffer, err error) {
+	exitCode = -1
+	path, err := buildDerivation(derivation)
+	if err != nil {
+		return
+	}
+
+	cmd := exec.Command("bash", path)
+	cmd.Stdout = &stdout
+	cmd.Stderr = &stderr
+
+	if err = cmd.Start(); err != nil {
+		return
+	}
+
+	if err = cmd.Wait(); err != nil {
+		if exiterr, ok := err.(*exec.ExitError); ok {
+			exitCode = exiterr.ExitCode()
+			err = nil
+		}
+		return
+	}
+
+	return 0, stdout, stderr, nil
 }
 
 func PrefixLines(input string) string {
@@ -170,6 +206,14 @@ func runTest(spec TestSpec) TestResult {
 		}
 	} else if spec.Type == "unit" {
 		expected = spec.Expected
+	} else if spec.Type == "script" {
+		exitCode, stdout, stderr, err := buildAndRun(spec.Script)
+		if err != nil {
+			result.Status = StatusError
+			result.ErrorMessage = fmt.Sprintf("[system] failed to run script: %v", err.Error())
+		}
+		expected = ""
+		actual = fmt.Sprintf("[exit code %d]\n[Stdout]\n%s\n[Stderr]\n%s", exitCode, stdout.String(), stderr.String())
 	} else {
 		log.Panic().Str("type", spec.Type).Msg("Invalid test type")
 	}

@@ -12,6 +12,7 @@
     expected ? null,
     actual ? null,
     actualDrv ? null,
+    script ? null,
     pos ? null,
   }: let
     fileRelative = lib.removePrefix ((toString self) + "/") pos.file;
@@ -29,6 +30,10 @@
     expected = expected';
     # discard string context, otherwise it's being built instantly which we don't want
     actualDrv = builtins.unsafeDiscardStringContext (actualDrv.drvPath or "");
+    script =
+      if script != null
+      then builtins.unsafeDiscardStringContext (pkgs.writeShellScript "nixtest-${name}" script).drvPath
+      else null;
     pos =
       if pos == null
       then ""
