@@ -106,7 +106,11 @@ func buildAndRun(derivation string) (exitCode int, stdout bytes.Buffer, stderr b
 		return
 	}
 
-	cmd := exec.Command("bash", path)
+	args := []string{"bash", path}
+	if *pure {
+		args = append([]string{"env", "-i"}, args...)
+	}
+	cmd := exec.Command(args[0], args[1:]...)
 	cmd.Stdout = &stdout
 	cmd.Stderr = &stderr
 
@@ -296,6 +300,7 @@ var (
 	)
 	updateSnapshots *bool   = flag.Bool("update-snapshots", false, "Update all snapshots")
 	skipPattern     *string = flag.String("skip", "", "Regular expression to skip (e.g., 'test-.*|.*-b')")
+	pure            *bool   = flag.Bool("pure", false, "Unset all env vars before running script tests")
 )
 
 func main() {

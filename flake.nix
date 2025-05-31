@@ -83,7 +83,9 @@
                   type = "script";
                   script = ''
                     echo Test something here
-                    exit 1
+                    # required in pure mode:
+                    export PATH="${lib.makeBinPath [pkgs.gnugrep]}"
+                    grep -q "test" ${builtins.toFile "test" "test"}
                   '';
                 }
               ];
