@@ -14,6 +14,7 @@
       systems = import systems;
       flake = {};
       perSystem = {
+        lib,
         pkgs,
         config,
         ...
