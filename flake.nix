@@ -9,6 +9,7 @@
         inputs.devenv.flakeModule
         inputs.treefmt-nix.flakeModule
         inputs.nix-gitlab-ci.flakeModule
+        inputs.nix-mkdocs.flakeModule
         ./lib/flakeModule.nix
       ];
       systems = import systems;
@@ -26,6 +27,12 @@
             mdformat.enable = true;
             gofmt.enable = true;
           };
+          settings.formatter.mdformat.command = let
+            pkg = pkgs.python3.withPackages (p: [
+              p.mdformat
+              p.mdformat-mkdocs
+            ]);
+          in "${pkg}/bin/mdformat";
         };
         devenv.shells.default = {
           containers = pkgs.lib.mkForce {};
@@ -136,8 +143,84 @@
           };
         };
 
+        doc = {
+          path = ./docs;
+          deps = pp: [
+            pp.mkdocs-material
+            (pp.callPackage inputs.mkdocs-material-umami {})
+          ];
+          config = {
+            site_name = "Nixtest";
+            repo_name = "TECHNOFAB/nixtest";
+            repo_url = "https://gitlab.com/TECHNOFAB/nixtest";
+            edit_uri = "edit/main/docs/";
+            theme = {
+              name = "material";
+              features = ["content.code.copy" "content.action.edit"];
+              icon.repo = "simple/gitlab";
+              logo = "images/logo.png";
+              favicon = "images/favicon.png";
+              palette = [
+                {
+                  scheme = "default";
+                  media = "(prefers-color-scheme: light)";
+                  primary = "green";
+                  accent = "light green";
+                  toggle = {
+                    icon = "material/brightness-7";
+                    name = "Switch to dark mode";
+                  };
+                }
+                {
+                  scheme = "slate";
+                  media = "(prefers-color-scheme: dark)";
+                  primary = "green";
+                  accent = "light green";
+                  toggle = {
+                    icon = "material/brightness-4";
+                    name = "Switch to light mode";
+                  };
+                }
+              ];
+            };
+            plugins = ["search" "material-umami"];
+            nav = [
+              {"Introduction" = "index.md";}
+              {"Usage" = "usage.md";}
+              {"CLI" = "cli.md";}
+              {"Example Configs" = "examples.md";}
+            ];
+            markdown_extensions = [
+              "pymdownx.superfences"
+            ];
+            extra.analytics = {
+              provider = "umami";
+              site_id = "716d1869-9342-4b62-a770-e15d2d5c807d";
+              src = "https://analytics.tf/umami";
+              domains = "nixtest.projects.tf";
+              feedback = {
+                title = "Was this page helpful?";
+                ratings = [
+                  {
+                    icon = "material/thumb-up-outline";
+                    name = "This page is helpful";
+                    data = "good";
+                    note = "Thanks for your feedback!";
+                  }
+                  {
+                    icon = "material/thumb-down-outline";
+                    name = "This page could be improved";
+                    data = "bad";
+                    note = "Thanks for your feedback! Please leave feedback by creating an issue :)";
+                  }
+                ];
+              };
+            };
+          };
+        };
+
         ci = {
-          stages = ["test"];
+          stages = ["test" "build" "deploy"];
           jobs = {
             "test" = {
               stage = "test";
@@ -149,6 +232,30 @@
                 when = "always";
                 reports.junit = "junit.xml";
               };
+            };
+            "docs" = {
+              stage = "build";
+              script = [
+                # sh
+                ''
+                  nix build .#docs:default
+                  mkdir -p public
+                  cp -r result/. public/
+                ''
+              ];
+              artifacts.paths = ["public"];
+            };
+            "pages" = {
+              nix.enable = false;
+              image = "alpine:latest";
+              stage = "deploy";
+              script = ["true"];
+              artifacts.paths = ["public"];
+              rules = [
+                {
+                  "if" = "$CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH";
+                }
+              ];
             };
           };
         };
@@ -165,7 +272,9 @@
     systems.url = "github:nix-systems/default-linux";
     devenv.url = "github:cachix/devenv";
     treefmt-nix.url = "github:numtide/treefmt-nix";
-    nix-gitlab-ci.url = "gitlab:TECHNOFAB/nix-gitlab-ci/2.0.0?dir=lib";
+    nix-gitlab-ci.url = "gitlab:technofab/nix-gitlab-ci/2.0.1?dir=lib";
+    nix-mkdocs.url = "gitlab:technofab/nixmkdocs?dir=lib";
+    mkdocs-material-umami.url = "gitlab:technofab/mkdocs-material-umami";
   };
 
   nixConfig = {

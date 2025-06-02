@@ -169,6 +169,21 @@
         "type": "github"
       }
     },
+    "mkdocs-material-umami": {
+      "locked": {
+        "lastModified": 1745840856,
+        "narHash": "sha256-1Ad1JTMQMP6YsoIKAA+SBCE15qWrYkGue9/lXOLnu9I=",
+        "owner": "technofab",
+        "repo": "mkdocs-material-umami",
+        "rev": "3ac9b194450f6b779c37b8d16fec640198e5cd0a",
+        "type": "gitlab"
+      },
+      "original": {
+        "owner": "technofab",
+        "repo": "mkdocs-material-umami",
+        "type": "gitlab"
+      }
+    },
     "nix": {
       "inputs": {
         "flake-compat": [
@@ -205,18 +220,35 @@
     "nix-gitlab-ci": {
       "locked": {
         "dir": "lib",
-        "lastModified": 1746300997,
-        "narHash": "sha256-PuI1WaDFgvRh5d0yBAJzkbbonZaTxqWqm1hu3WP+9iU=",
-        "owner": "TECHNOFAB",
+        "lastModified": 1746973171,
+        "narHash": "sha256-q/LhPZlhJB2gXZ5BfgU1Wep/1x1y9Sct3/JU8A2fzjg=",
+        "owner": "technofab",
         "repo": "nix-gitlab-ci",
-        "rev": "9ee4ad02b8f950d48fb30ab11b8475a3f52d327c",
+        "rev": "dca2d724c155799e537a898cb9f948f8afae4921",
         "type": "gitlab"
       },
       "original": {
         "dir": "lib",
-        "owner": "TECHNOFAB",
-        "ref": "2.0.0",
+        "owner": "technofab",
+        "ref": "2.0.1",
         "repo": "nix-gitlab-ci",
+        "type": "gitlab"
+      }
+    },
+    "nix-mkdocs": {
+      "locked": {
+        "dir": "lib",
+        "lastModified": 1745841841,
+        "narHash": "sha256-297zPQbUlc7ZAYDoaD6mCmQxCC3Tr4YOKekRF1ArZ7g=",
+        "owner": "technofab",
+        "repo": "nixmkdocs",
+        "rev": "c7e3c3b13ded25818e9789938387bba6f2cde690",
+        "type": "gitlab"
+      },
+      "original": {
+        "dir": "lib",
+        "owner": "technofab",
+        "repo": "nixmkdocs",
         "type": "gitlab"
       }
     },
@@ -319,7 +351,9 @@
       "inputs": {
         "devenv": "devenv",
         "flake-parts": "flake-parts_2",
+        "mkdocs-material-umami": "mkdocs-material-umami",
         "nix-gitlab-ci": "nix-gitlab-ci",
+        "nix-mkdocs": "nix-mkdocs",
         "nixpkgs": "nixpkgs_4",
         "systems": "systems",
         "treefmt-nix": "treefmt-nix"
