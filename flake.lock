@@ -217,6 +217,23 @@
         "type": "github"
       }
     },
+    "nix-devtools": {
+      "locked": {
+        "dir": "lib",
+        "lastModified": 1739971859,
+        "narHash": "sha256-DaY11jX7Lraw7mRUIsgPsO+aSkkewQe2D+WMZORTNPE=",
+        "owner": "technofab",
+        "repo": "nix-devtools",
+        "rev": "b4f059657de5ac2569afd69a8f042614d309e6bb",
+        "type": "gitlab"
+      },
+      "original": {
+        "dir": "lib",
+        "owner": "technofab",
+        "repo": "nix-devtools",
+        "type": "gitlab"
+      }
+    },
     "nix-gitlab-ci": {
       "locked": {
         "dir": "lib",
@@ -352,6 +369,7 @@
         "devenv": "devenv",
         "flake-parts": "flake-parts_2",
         "mkdocs-material-umami": "mkdocs-material-umami",
+        "nix-devtools": "nix-devtools",
         "nix-gitlab-ci": "nix-gitlab-ci",
         "nix-mkdocs": "nix-mkdocs",
         "nixpkgs": "nixpkgs_4",

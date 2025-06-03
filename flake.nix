@@ -9,6 +9,7 @@
         inputs.devenv.flakeModule
         inputs.treefmt-nix.flakeModule
         inputs.nix-gitlab-ci.flakeModule
+        inputs.nix-devtools.flakeModule
         inputs.nix-mkdocs.flakeModule
         ./lib/flakeModule.nix
       ];
@@ -36,7 +37,7 @@
         };
         devenv.shells.default = {
           containers = pkgs.lib.mkForce {};
-          packages = [pkgs.gopls pkgs.gore];
+          packages = with pkgs; [gopls gore go-junit-report];
 
           languages.go.enable = true;
 
@@ -46,6 +47,19 @@
               packageOverrides.treefmt = config.treefmt.build.wrapper;
             };
             convco.enable = true;
+          };
+
+          task = {
+            enable = true;
+            alias = ",";
+            tasks = {
+              "test" = {
+                cmds = [
+                  "go test -v -coverprofile cover.out ./..."
+                  "go tool cover -html cover.out -o cover.html"
+                ];
+              };
+            };
           };
         };
 
@@ -233,6 +247,32 @@
                 reports.junit = "junit.xml";
               };
             };
+            "test:go" = {
+              stage = "test";
+              nix.deps = with pkgs; [go go-junit-report gocover-cobertura];
+              variables = {
+                GOPATH = "$CI_PROJECT_DIR/.go";
+                GOCACHE = "$CI_PROJECT_DIR/.go/pkg/mod";
+              };
+              script = [
+                "go test -coverprofile=coverage.out -v 2>&1 ./... | go-junit-report -set-exit-code > report.xml"
+                "go tool cover -func coverage.out"
+                "gocover-cobertura < coverage.out > coverage.xml"
+              ];
+              allow_failure = true;
+              coverage = "/\(statements\)(?:\s+)?(\d+(?:\.\d+)?%)/";
+              cache.paths = [".go/pkg/mod/"];
+              artifacts = {
+                when = "always";
+                reports = {
+                  junit = "report.xml";
+                  coverage_report = {
+                    coverage_format = "cobertura";
+                    path = "coverage.xml";
+                  };
+                };
+              };
+            };
             "docs" = {
               stage = "build";
               script = [
@@ -273,6 +313,7 @@
     devenv.url = "github:cachix/devenv";
     treefmt-nix.url = "github:numtide/treefmt-nix";
     nix-gitlab-ci.url = "gitlab:technofab/nix-gitlab-ci/2.0.1?dir=lib";
+    nix-devtools.url = "gitlab:technofab/nix-devtools?dir=lib";
     nix-mkdocs.url = "gitlab:technofab/nixmkdocs?dir=lib";
     mkdocs-material-umami.url = "gitlab:technofab/mkdocs-material-umami";
   };
