@@ -93,7 +93,7 @@ Examples:
     name = "pretty-test";
     # by default it uses json to serialize and compare the values. Derivations
     # and functions don't really work that way though, so you can also use
-    # "pretty" to use lib.generators.pretty
+    # "pretty" to use lib.generators.toPretty
     format = "pretty";
     # you can also set the pos here
     pos = __curPos;
