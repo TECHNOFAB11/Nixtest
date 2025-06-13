@@ -5,6 +5,8 @@
 }: let
   inherit (lib) evalModules toList;
 in rec {
+  helpers = import ./testHelpers.nix {inherit lib;};
+
   mkBinary = {
     nixtests,
     extraParams,
@@ -46,7 +48,7 @@ in rec {
 
   mkNixtestConfig = {
     modules,
-    args,
+    args ? {},
     ...
   }:
     (evalModules {
