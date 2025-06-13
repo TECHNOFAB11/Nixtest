@@ -141,21 +141,10 @@
         ci = {
           stages = ["test" "build" "deploy"];
           jobs = {
-            "test:flakeModule" = {
-              stage = "test";
-              script = [
-                "nix run .#nixtests:run -- --junit=junit.xml"
-              ];
-              allow_failure = true;
-              artifacts = {
-                when = "always";
-                reports.junit = "junit.xml";
-              };
-            };
             "test:lib" = {
               stage = "test";
               script = [
-                "nix run .#lib-tests -- --junit=junit.xml"
+                "nix run .#tests -- --junit=junit.xml"
               ];
               allow_failure = true;
               artifacts = {
