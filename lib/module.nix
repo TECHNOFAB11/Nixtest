@@ -108,11 +108,7 @@
           then val
           else
             builtins.unsafeDiscardStringContext
-            (pkgs.writeShellScript "nixtest-${config.name}" ''
-              # show which line failed the test
-              set -x
-              ${val}
-            '').drvPath;
+            (pkgs.writeShellScript "nixtest-${config.name}" val).drvPath;
       };
     };
   };
