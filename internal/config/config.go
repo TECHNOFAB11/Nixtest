@@ -1,6 +1,9 @@
 package config
 
 import (
+	"fmt"
+	"os"
+
 	"github.com/jedib0t/go-pretty/v6/text"
 	"github.com/rs/zerolog/log"
 	flag "github.com/spf13/pflag"
@@ -28,8 +31,15 @@ func Load() AppConfig {
 	flag.StringVarP(&cfg.SkipPattern, "skip", "s", "", "Regular expression to skip tests (e.g., 'test-.*|.*-b')")
 	flag.BoolVar(&cfg.PureEnv, "pure", false, "Unset all env vars before running script tests")
 	flag.BoolVar(&cfg.NoColor, "no-color", false, "Disable coloring")
+	helpRequested := flag.BoolP("help", "h", false, "Show this menu")
 
 	flag.Parse()
+
+	if *helpRequested {
+		fmt.Println("Usage of nixtest:")
+		flag.PrintDefaults()
+		os.Exit(0)
+	}
 
 	if cfg.TestsFile == "" {
 		log.Panic().Msg("Tests file path (-f or --tests) is required.")
