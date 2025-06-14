@@ -15,56 +15,14 @@ in {
       nixtests-lib = import ./. {inherit pkgs self;};
     in {
       options.nixtest = mkOption {
-        type = types.submodule ({...}: {
-          options = {
-            skip = mkOption {
-              type = types.str;
-              default = "";
-              description = "Which tests to skip (regex)";
-            };
-            suites = mkOption {
-              type = types.attrsOf (types.submodule {
-                options = {
-                  tests = mkOption {
-                    type = types.listOf types.attrs;
-                    default = [];
-                  };
-                  pos = mkOption {
-                    type = types.nullOr types.attrs;
-                    default = null;
-                  };
-                };
-              });
-              default = {};
-            };
-          };
-        });
+        type = types.submodule (nixtests-lib.module);
         default = {};
       };
+      config.nixtest.base = toString self + "/";
 
-      config.legacyPackages = rec {
-        "nixtests" = let
-          suites = map (suiteName: let
-            suite = builtins.getAttr suiteName config.nixtest.suites;
-          in
-            nixtests-lib.mkSuite
-            suiteName
-            (map (test:
-              nixtests-lib.mkTest ({
-                  # default pos to suite's pos if given
-                  pos = suite.pos;
-                }
-                // test))
-            suite.tests))
-          (builtins.attrNames config.nixtest.suites);
-        in
-          nixtests-lib.exportSuites suites;
-        "nixtests:run" = let
-          program = pkgs.callPackage ./../package.nix {};
-        in
-          pkgs.writeShellScriptBin "nixtests:run" ''
-            ${program}/bin/nixtest --tests=${nixtests} --skip="${config.nixtest.skip}" "$@"
-          '';
+      config.legacyPackages = {
+        "nixtests" = config.nixtest.finalConfigJson;
+        "nixtests:run" = config.nixtest.app;
       };
     }
   );

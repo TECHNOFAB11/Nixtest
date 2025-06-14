@@ -2,6 +2,9 @@
 
 ## Flake Module
 
+The easiest way to use Nixtest is probably using the flakeModule.
+Just import `nixtest.flakeModule`, then define suites and tests in `perSystem`:
+
 ```nix
 {
   inputs.nixtest.url = "gitlab:TECHNOFAB/nixtest?dir=lib";
@@ -34,10 +37,25 @@
 
 ## Library
 
-You can also integrate nixtest in your own workflow by using the lib functions directly.
-Check out `flakeModule.nix` to see how it's used there.
+You can also use the lib directly, like this for example:
 
-<!-- TODO: more detailed? -->
+```nix
+packages.tests = ntlib.mkNixtest {
+  modules = ntlib.autodiscover {dir = ./tests;};
+  args = {
+    inherit pkgs ntlib;
+  };
+};
+```
+
+This will auto-discover all test files ending with `_test.nix`.
+See [reference](reference.md) for all params to `autodiscover`.
+
+`ntlib` can be defined like this:
+
+```nix
+ntlib = inputs.nixtests.lib {inherit pkgs;};
+```
 
 ## Define Tests
 
@@ -84,9 +102,17 @@ Examples:
     # to make it more reproducible and cleaner, use --pure to switch to pure
     # mode which will unset all env variables before running the test. That 
     # requires you to set PATH yourself then:
+    # 
+    # ''
+    #  export PATH="${lib.makeBinPath [pkgs.gnugrep]}"
+    #  grep -q "test" ${builtins.toFile "test" "test"}
+    # '';
+    #
+    # you can also use the helpers to make it nicer to read:
     ''
-      export PATH="${lib.makeBinPath [pkgs.gnugrep]}"
-      grep -q "test" ${builtins.toFile "test" "test"}
+      ${ntlib.helpers.path [pkgs.gnugrep]}
+      ${ntlib.helpers.scriptHelpers}  # this adds helpers like assert etc.
+      assert_file_contains ${builtins.toFile "test" "test"} "test" "file should contain 'test'"
     '';
   }
   {
@@ -102,3 +128,7 @@ Examples:
   }
 ]
 ```
+
+!!! note
+
+    for more examples see [examples](./examples.md)
