@@ -106,11 +106,13 @@
             nav = [
               {"Introduction" = "index.md";}
               {"Usage" = "usage.md";}
+              {"Reference" = "reference.md";}
               {"CLI" = "cli.md";}
               {"Example Configs" = "examples.md";}
             ];
             markdown_extensions = [
               "pymdownx.superfences"
+              "admonition"
             ];
             extra.analytics = {
               provider = "umami";
