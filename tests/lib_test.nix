@@ -13,6 +13,10 @@
           actual = ntlib.helpers.toPrettyFile (ntlib.autodiscover {
             dir = ./fixtures;
           });
+          # tests if strings with store path context work
+          actualDirString = ntlib.helpers.toPrettyFile (ntlib.autodiscover {
+            dir = "${./fixtures}";
+          });
         in
           # sh
           ''
@@ -20,6 +24,9 @@
             ${ntlib.helpers.scriptHelpers}
             assert_file_contains ${actual} "sample_test.nix" "should find sample_test.nix"
             assert_file_contains ${actual} "base = \"/nix/store/.*-source/tests/fixtures/\"" "should set base to fixtures dir"
+
+            assert_file_contains ${actualDirString} "sample_test.nix" "should find sample_test.nix"
+            assert_file_contains ${actualDirString} "base = \"/nix/store/.*-fixtures/\"" "should set base to fixtures dir"
           '';
       }
       {

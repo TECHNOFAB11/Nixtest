@@ -39,7 +39,11 @@ in rec {
   }: let
     files = builtins.readDir dir;
     matchingFiles = builtins.filter (name: builtins.match pattern name != null) (builtins.attrNames files);
-    imports = map (file: /${dir}/${file}) matchingFiles;
+    imports = map (file:
+      if builtins.isString dir
+      then (builtins.unsafeDiscardStringContext dir) + "/${file}"
+      else /${dir}/${file})
+    matchingFiles;
   in {
     inherit imports;
     # automatically set the base so test filepaths are easier to read
