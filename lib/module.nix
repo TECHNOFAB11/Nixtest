@@ -3,7 +3,17 @@
   lib,
   ...
 }: let
-  inherit (lib) mkOptionType mkOption types;
+  inherit
+    (lib)
+    mkOptionType
+    mkOption
+    types
+    filterAttrs
+    isType
+    removePrefix
+    assertMsg
+    generators
+    ;
 
   nixtest-lib = import ./default.nix {inherit pkgs lib;};
 
@@ -16,14 +26,14 @@
   unset = {
     _type = "unset";
   };
-  isUnset = lib.isType "unset";
+  isUnset = isType "unset";
 
   filterUnset = value:
     if builtins.isAttrs value && !builtins.hasAttr "_type" value
     then let
       filteredAttrs = builtins.mapAttrs (n: v: filterUnset v) value;
     in
-      lib.filterAttrs (name: value: (!isUnset value)) filteredAttrs
+      filterAttrs (name: value: (!isUnset value)) filteredAttrs
     else if builtins.isList value
     then builtins.filter (elem: !isUnset elem) (map filterUnset value)
     else value;
@@ -42,18 +52,18 @@
           if isUnset val
           then val
           else let
-            fileRelative = lib.removePrefix testsBase val.file;
+            fileRelative = removePrefix testsBase val.file;
           in "${fileRelative}:${toString val.line}";
       };
       type = mkOption {
         type = types.enum ["unit" "snapshot" "script"];
         default = "unit";
         apply = value:
-          assert lib.assertMsg (value != "script" || !isUnset config.script)
+          assert assertMsg (value != "script" || !isUnset config.script)
           "test '${config.name}' as type 'script' requires 'script' to be set";
-          assert lib.assertMsg (value != "unit" || !isUnset config.expected)
+          assert assertMsg (value != "unit" || !isUnset config.expected)
           "test '${config.name}' as type 'unit' requires 'expected' to be set";
-          assert lib.assertMsg (
+          assert assertMsg (
             let
               actualIsUnset = isUnset config.actual;
               actualDrvIsUnset = isUnset config.actualDrv;
@@ -81,7 +91,7 @@
         apply = val:
           if isUnset val || config.format == "json"
           then val
-          else lib.generators.toPretty {} val;
+          else generators.toPretty {} val;
       };
       actual = mkOption {
         type = types.anything;
@@ -89,7 +99,7 @@
         apply = val:
           if isUnset val || config.format == "json"
           then val
-          else lib.generators.toPretty {} val;
+          else generators.toPretty {} val;
       };
       actualDrv = mkOption {
         type = types.either types.package unsetType;
