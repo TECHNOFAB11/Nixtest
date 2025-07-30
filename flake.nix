@@ -36,9 +36,12 @@
         };
         devenv.shells.default = {
           containers = pkgs.lib.mkForce {};
-          packages = with pkgs; [gopls gore go-junit-report];
+          packages = with pkgs; [gore go-junit-report];
 
-          languages.go.enable = true;
+          languages.go = {
+            enable = true;
+            enableHardeningWorkaround = true;
+          };
 
           pre-commit.hooks = {
             treefmt = {
