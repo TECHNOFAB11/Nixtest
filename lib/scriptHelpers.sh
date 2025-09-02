@@ -35,16 +35,6 @@ function assert_file_not_contains() {
   }
 }
 
-function tmpdir() {
-  dir=$(mktemp -d)
-  trap "rm -rf $dir" EXIT
-  echo -n "$dir"
-}
-function tmpfile() {
-  file=$(mktemp)
-  trap "rm -f $file" EXIT
-  echo -n "$file"
-}
 function run() {
   output=$($@ 2>&1)
   exit_code=$?

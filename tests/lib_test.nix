@@ -70,21 +70,21 @@
         in
           # sh
           ''
-            ${ntlib.helpers.path [pkgs.gnugrep pkgs.mktemp]}
+            ${ntlib.helpers.path [pkgs.gnugrep pkgs.mktemp pkgs.coreutils]}
             ${ntlib.helpers.scriptHelpers}
+            cp -r ${./../snapshots} snapshots
 
-            TMPDIR=$(tmpdir)
             # start without nix & env binaries to expect errors
-            run "${binary} --junit=$TMPDIR/junit.xml"
+            run "${binary} --junit=junit.xml"
             assert "$exit_code -eq 2" "should exit 2"
-            assert "-f $TMPDIR/junit.xml" "should create junit.xml"
+            assert "-f junit.xml" "should create junit.xml"
             assert_contains "$output" "executable file not found" "nix should not be found in pure mode"
 
             # now add required deps
             ${ntlib.helpers.pathAdd [pkgs.nix pkgs.coreutils]}
-            run "${binary} --junit=$TMPDIR/junit2.xml"
+            run "${binary} --junit=junit2.xml"
             assert "$exit_code -eq 2" "should exit 2"
-            assert "-f $TMPDIR/junit2.xml" "should create junit2.xml"
+            assert "-f junit2.xml" "should create junit2.xml"
             assert_not_contains "$output" "executable file not found" "nix should now exist"
             assert_contains "$output" "suite-one" "should contain suite-one"
             assert_contains "$output" "8/11 (1 SKIPPED)" "should be 8/11 total"

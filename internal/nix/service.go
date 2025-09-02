@@ -3,6 +3,7 @@ package nix
 import (
 	"bytes"
 	"encoding/json"
+	"fmt"
 	"os"
 	"os/exec"
 	"strings"
@@ -79,6 +80,13 @@ func (s *DefaultService) BuildAndRunScript(derivation string, impureEnv bool) (e
 		return exitCode, "", "", err
 	}
 
+	// run scripts in a temporary directory
+	tempDir, err := os.MkdirTemp("", "nixtest-script-")
+	if err != nil {
+		return exitCode, "", "", &apperrors.ScriptExecutionError{Path: path, Err: fmt.Errorf("failed to create temporary directory: %w", err)}
+	}
+	defer os.RemoveAll(tempDir)
+
 	var cmdArgs []string
 	if impureEnv {
 		cmdArgs = []string{"bash", path}
@@ -87,6 +95,7 @@ func (s *DefaultService) BuildAndRunScript(derivation string, impureEnv bool) (e
 	}
 
 	cmd := s.commandExecutor(cmdArgs[0], cmdArgs[1:]...)
+	cmd.Dir = tempDir
 	var outBuf, errBuf bytes.Buffer
 	cmd.Stdout = &outBuf
 	cmd.Stderr = &errBuf
