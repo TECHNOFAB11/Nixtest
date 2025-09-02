@@ -232,7 +232,7 @@ func TestDefaultService_BuildAndRunScript(t *testing.T) {
 	tests := []struct {
 		name                 string
 		derivation           string
-		pureEnv              bool
+		impureEnv            bool
 		mockBuildDrvOutput   string
 		mockBuildDrvError    string
 		mockBuildDrvExitCode string
@@ -252,7 +252,7 @@ func TestDefaultService_BuildAndRunScript(t *testing.T) {
 			0, "Hello", "ErrOut", false, nil, "",
 		},
 		{
-			"Success pure", "script.drv#sh", true, mockScriptPath, "", "0",
+			"Success impure", "script.drv#sh", true, mockScriptPath, "", "0",
 			"Hello", "ErrOut", "0",
 			0, "Hello", "ErrOut", false, nil, "",
 		},
@@ -277,7 +277,7 @@ func TestDefaultService_BuildAndRunScript(t *testing.T) {
 			os.Setenv("MOCK_SCRIPT_STDERR", tt.mockScriptStderr)
 			os.Setenv("MOCK_SCRIPT_EXIT_CODE", tt.mockScriptExitCode)
 
-			exitCode, stdout, stderr, err := service.BuildAndRunScript(tt.derivation, tt.pureEnv)
+			exitCode, stdout, stderr, err := service.BuildAndRunScript(tt.derivation, tt.impureEnv)
 
 			if (err != nil) != tt.wantErr {
 				t.Fatalf("BuildAndRunScript() error = %v, wantErr %v", err, tt.wantErr)

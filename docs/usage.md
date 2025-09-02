@@ -96,10 +96,10 @@ Examples:
     name = "script-test";
     type = "script";
     script = 
-    # there are two modes, "default"/"impure" and "pure"
+    # there are two modes, "default"/"pure" and "impure"
     # in impure mode all env variables etc. from your current session are kept
-    # and are available to the test
-    # to make it more reproducible and cleaner, use --pure to switch to pure
+    # and are available to the test (using --impure).
+    # to make it more reproducible and cleaner, the default is pure
     # mode which will unset all env variables before running the test. That 
     # requires you to set PATH yourself then:
     # 

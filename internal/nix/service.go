@@ -14,7 +14,7 @@ import (
 type Service interface {
 	BuildDerivation(derivation string) (string, error)
 	BuildAndParseJSON(derivation string) (any, error)
-	BuildAndRunScript(derivation string, pureEnv bool) (exitCode int, stdout string, stderr string, err error)
+	BuildAndRunScript(derivation string, impureEnv bool) (exitCode int, stdout string, stderr string, err error)
 }
 
 type DefaultService struct {
@@ -72,7 +72,7 @@ func (s *DefaultService) BuildAndParseJSON(derivation string) (any, error) {
 }
 
 // BuildAndRunScript builds a derivation and runs it as a script
-func (s *DefaultService) BuildAndRunScript(derivation string, pureEnv bool) (exitCode int, stdout string, stderr string, err error) {
+func (s *DefaultService) BuildAndRunScript(derivation string, impureEnv bool) (exitCode int, stdout string, stderr string, err error) {
 	exitCode = -1
 	path, err := s.BuildDerivation(derivation)
 	if err != nil {
@@ -80,10 +80,10 @@ func (s *DefaultService) BuildAndRunScript(derivation string, pureEnv bool) (exi
 	}
 
 	var cmdArgs []string
-	if pureEnv {
-		cmdArgs = append([]string{"env", "-i"}, "bash", path)
-	} else {
+	if impureEnv {
 		cmdArgs = []string{"bash", path}
+	} else {
+		cmdArgs = append([]string{"env", "-i"}, "bash", path)
 	}
 
 	cmd := s.commandExecutor(cmdArgs[0], cmdArgs[1:]...)

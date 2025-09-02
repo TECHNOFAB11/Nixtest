@@ -60,7 +60,7 @@ func main() {
 		SnapshotDir:     appCfg.SnapshotDir,
 		UpdateSnapshots: appCfg.UpdateSnapshots,
 		SkipPattern:     appCfg.SkipPattern,
-		PureEnv:         appCfg.PureEnv,
+		ImpureEnv:       appCfg.ImpureEnv,
 	}
 	testRunner, err := runner.New(runnerCfg, nixService, snapshotService)
 	if err != nil {

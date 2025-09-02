@@ -32,7 +32,7 @@ type Config struct {
 	SnapshotDir     string
 	UpdateSnapshots bool
 	SkipPattern     string
-	PureEnv         bool
+	ImpureEnv       bool
 }
 
 func New(cfg Config, nixService nix.Service, snapService snapshot.Service) (*Runner, error) {
@@ -181,7 +181,7 @@ func (r *Runner) handleUnitTest(result *types.TestResult, spec types.TestSpec, a
 
 // handleScriptTest processes script type tests
 func (r *Runner) handleScriptTest(result *types.TestResult, spec types.TestSpec) {
-	exitCode, stdout, stderrStr, err := r.nixService.BuildAndRunScript(spec.Script, r.config.PureEnv)
+	exitCode, stdout, stderrStr, err := r.nixService.BuildAndRunScript(spec.Script, r.config.ImpureEnv)
 	if err != nil {
 		result.Status = types.StatusError
 		result.ErrorMessage = fmt.Sprintf("[system] failed to run script derivation %s: %v", spec.Script, err)

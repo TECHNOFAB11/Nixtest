@@ -1,6 +1,6 @@
 module gitlab.com/technofab/nixtest
 
-go 1.24.2
+go 1.23.0
 
 require (
 	github.com/akedrou/textdiff v0.1.0

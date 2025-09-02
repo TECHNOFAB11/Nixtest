@@ -4,7 +4,7 @@
 Usage of nixtest:
       --junit string          Path to generate JUNIT report to, leave empty to disable
       --no-color              Disable coloring
-      --pure                  Unset all env vars before running script tests
+      --impure                Don\'t unset all env vars before running script tests
   -s, --skip string           Regular expression to skip tests (e.g., 'test-.*|.*-b')
       --snapshot-dir string   Directory where snapshots are stored (default "./snapshots")
   -f, --tests string          Path to JSON file containing tests (required)

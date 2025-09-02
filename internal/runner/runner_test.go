@@ -18,7 +18,7 @@ import (
 type mockNixService struct {
 	BuildDerivationFunc   func(derivation string) (string, error)
 	BuildAndParseJSONFunc func(derivation string) (any, error)
-	BuildAndRunScriptFunc func(derivation string, pureEnv bool) (exitCode int, stdout string, stderr string, err error)
+	BuildAndRunScriptFunc func(derivation string, impureEnv bool) (exitCode int, stdout string, stderr string, err error)
 }
 
 func (m *mockNixService) BuildDerivation(d string) (string, error) {
@@ -253,7 +253,7 @@ func TestRunner_executeTest(t *testing.T) {
 			spec:         types.TestSpec{Name: "ScriptSuccess", Type: types.TestTypeScript, Script: "script.sh"},
 			runnerConfig: Config{},
 			setupMockServices: func(t *testing.T, mNix *mockNixService, mSnap *mockSnapshotService, s types.TestSpec, c Config) {
-				mNix.BuildAndRunScriptFunc = func(derivation string, pureEnv bool) (int, string, string, error) {
+				mNix.BuildAndRunScriptFunc = func(derivation string, impureEnv bool) (int, string, string, error) {
 					return 0, "stdout", "stderr", nil
 				}
 			},
@@ -264,7 +264,7 @@ func TestRunner_executeTest(t *testing.T) {
 			spec:         types.TestSpec{Name: "ScriptFail", Type: types.TestTypeScript, Script: "script.sh"},
 			runnerConfig: Config{},
 			setupMockServices: func(t *testing.T, mNix *mockNixService, mSnap *mockSnapshotService, s types.TestSpec, c Config) {
-				mNix.BuildAndRunScriptFunc = func(derivation string, pureEnv bool) (int, string, string, error) {
+				mNix.BuildAndRunScriptFunc = func(derivation string, impureEnv bool) (int, string, string, error) {
 					return 1, "out on fail", "err on fail", nil
 				}
 			},
@@ -313,7 +313,7 @@ func TestRunner_RunTests(t *testing.T) {
 	mockSnapSvc := &mockSnapshotService{}
 
 	mockNixSvc.BuildAndParseJSONFunc = func(derivation string) (any, error) { return "parsed", nil }
-	mockNixSvc.BuildAndRunScriptFunc = func(derivation string, pureEnv bool) (int, string, string, error) { return 0, "", "", nil }
+	mockNixSvc.BuildAndRunScriptFunc = func(derivation string, impureEnv bool) (int, string, string, error) { return 0, "", "", nil }
 	mockSnapSvc.StatFunc = func(name string) (os.FileInfo, error) { return mockFileInfo{}, nil }
 	mockSnapSvc.LoadFileFunc = func(filePath string) (any, error) { return "snapshot", nil }
 	mockSnapSvc.CreateFileFunc = func(filePath string, data any) error { return nil }

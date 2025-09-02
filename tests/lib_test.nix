@@ -36,7 +36,7 @@
           binary =
             (ntlib.mkBinary {
               nixtests = "stub";
-              extraParams = "--pure";
+              extraParams = "--impure";
             })
             + "/bin/nixtests:run";
         in
@@ -45,7 +45,7 @@
             ${ntlib.helpers.path [pkgs.gnugrep]}
             ${ntlib.helpers.scriptHelpers}
             assert_file_contains ${binary} "nixtest" "should contain nixtest"
-            assert_file_contains ${binary} "--pure" "should contain --pure arg"
+            assert_file_contains ${binary} "--impure" "should contain --impure arg"
             assert_file_contains ${binary} "--tests=stub" "should contain --tests arg"
 
             run "${binary} --help"
@@ -75,14 +75,14 @@
 
             TMPDIR=$(tmpdir)
             # start without nix & env binaries to expect errors
-            run "${binary} --pure --junit=$TMPDIR/junit.xml"
+            run "${binary} --junit=$TMPDIR/junit.xml"
             assert "$exit_code -eq 2" "should exit 2"
             assert "-f $TMPDIR/junit.xml" "should create junit.xml"
             assert_contains "$output" "executable file not found" "nix should not be found in pure mode"
 
             # now add required deps
             ${ntlib.helpers.pathAdd [pkgs.nix pkgs.coreutils]}
-            run "${binary} --pure --junit=$TMPDIR/junit2.xml"
+            run "${binary} --junit=$TMPDIR/junit2.xml"
             assert "$exit_code -eq 2" "should exit 2"
             assert "-f $TMPDIR/junit2.xml" "should create junit2.xml"
             assert_not_contains "$output" "executable file not found" "nix should now exist"

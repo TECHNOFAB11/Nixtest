@@ -16,7 +16,7 @@ type AppConfig struct {
 	JunitPath       string
 	UpdateSnapshots bool
 	SkipPattern     string
-	PureEnv         bool
+	ImpureEnv       bool
 	NoColor         bool
 }
 
@@ -29,7 +29,7 @@ func Load() AppConfig {
 	flag.StringVar(&cfg.JunitPath, "junit", "", "Path to generate JUNIT report to, leave empty to disable")
 	flag.BoolVarP(&cfg.UpdateSnapshots, "update-snapshots", "u", false, "Update all snapshots")
 	flag.StringVarP(&cfg.SkipPattern, "skip", "s", "", "Regular expression to skip tests (e.g., 'test-.*|.*-b')")
-	flag.BoolVar(&cfg.PureEnv, "pure", false, "Unset all env vars before running script tests")
+	flag.BoolVar(&cfg.ImpureEnv, "impure", false, "Don't unset all env vars before running script tests")
 	flag.BoolVar(&cfg.NoColor, "no-color", false, "Disable coloring")
 	helpRequested := flag.BoolP("help", "h", false, "Show this menu")
 

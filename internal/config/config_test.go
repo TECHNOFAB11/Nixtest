@@ -64,7 +64,7 @@ func TestLoad_CustomValues(t *testing.T) {
 		"--junit", "report.xml",
 		"-u",
 		"--skip", "specific-test",
-		"--pure",
+		"--impure",
 		"--no-color",
 	}
 	pflag.CommandLine = pflag.NewFlagSet(os.Args[0], pflag.ExitOnError) // Reset flags
@@ -83,7 +83,7 @@ func TestLoad_CustomValues(t *testing.T) {
 	if cfg.SkipPattern != "specific-test" {
 		t.Errorf("SkipPattern: got %s, want specific-test", cfg.SkipPattern)
 	}
-	if !cfg.PureEnv {
-		t.Errorf("PureEnv: got %v, want true", cfg.PureEnv)
+	if !cfg.ImpureEnv {
+		t.Errorf("ImpureEnv: got %v, want true", cfg.ImpureEnv)
 	}
 }
