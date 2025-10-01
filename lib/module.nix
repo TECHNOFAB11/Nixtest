@@ -205,6 +205,7 @@
   };
 
   nixtestSubmodule = {config, ...}: {
+    _file = ./module.nix;
     options = {
       base = mkOption {
         type = types.str;
