@@ -17,6 +17,7 @@
       perSystem = {
         lib,
         pkgs,
+        self',
         config,
         ...
       }: {
@@ -65,81 +66,48 @@
           };
         };
 
-        doc = {
+        docs."default".config = {
           path = ./docs;
-          deps = pp: [
-            pp.mkdocs-material
-            (pp.callPackage inputs.mkdocs-material-umami {})
-          ];
+          material = {
+            enable = true;
+            colors = {
+              primary = "green";
+              accent = "light green";
+            };
+            umami = {
+              enable = true;
+              src = "https://analytics.tf/umami";
+              siteId = "716d1869-9342-4b62-a770-e15d2d5c807d";
+              domains = ["nixtest.projects.tf"];
+            };
+          };
+          macros = {
+            enable = true;
+            includeDir = toString self'.packages.optionsDocs;
+          };
           config = {
             site_name = "Nixtest";
+            site_url = "https://nixtest.projects.tf";
             repo_name = "TECHNOFAB/nixtest";
             repo_url = "https://gitlab.com/TECHNOFAB/nixtest";
-            edit_uri = "edit/main/docs/";
+            extra_css = ["style.css"];
             theme = {
-              name = "material";
-              features = ["content.code.copy" "content.action.edit"];
               icon.repo = "simple/gitlab";
-              logo = "images/logo.png";
-              favicon = "images/favicon.png";
-              palette = [
-                {
-                  scheme = "default";
-                  media = "(prefers-color-scheme: light)";
-                  primary = "green";
-                  accent = "light green";
-                  toggle = {
-                    icon = "material/brightness-7";
-                    name = "Switch to dark mode";
-                  };
-                }
-                {
-                  scheme = "slate";
-                  media = "(prefers-color-scheme: dark)";
-                  primary = "green";
-                  accent = "light green";
-                  toggle = {
-                    icon = "material/brightness-4";
-                    name = "Switch to light mode";
-                  };
-                }
-              ];
+              logo = "images/logo.svg";
+              favicon = "images/logo.svg";
             };
-            plugins = ["search" "material-umami"];
             nav = [
               {"Introduction" = "index.md";}
               {"Usage" = "usage.md";}
               {"Reference" = "reference.md";}
               {"CLI" = "cli.md";}
               {"Example Configs" = "examples.md";}
+              {"Options" = "options.md";}
             ];
             markdown_extensions = [
               "pymdownx.superfences"
               "admonition"
             ];
-            extra.analytics = {
-              provider = "umami";
-              site_id = "716d1869-9342-4b62-a770-e15d2d5c807d";
-              src = "https://analytics.tf/umami";
-              domains = "nixtest.projects.tf";
-              feedback = {
-                title = "Was this page helpful?";
-                ratings = [
-                  {
-                    icon = "material/thumb-up-outline";
-                    name = "This page is helpful";
-                    data = "good";
-                    note = "Thanks for your feedback!";
-                  }
-                  {
-                    icon = "material/thumb-down-outline";
-                    name = "This page could be improved";
-                    data = "bad";
-                    note = "Thanks for your feedback! Please leave feedback by creating an issue :)";
-                  }
-                ];
-              };
-            };
           };
         };
 
@@ -212,7 +180,8 @@
 
         packages = let
           ntlib = import ./lib {inherit pkgs lib;};
-        in {
+          doclib = inputs.nix-mkdocs.lib {inherit lib pkgs;};
+        in rec {
           default = pkgs.callPackage ./package.nix {};
           tests = ntlib.mkNixtest {
             modules = ntlib.autodiscover {dir = ./tests;};
@@ -220,6 +189,24 @@
               inherit pkgs ntlib;
             };
           };
+          optionsDoc = doclib.mkOptionDocs {
+            module = {
+              _module.args.pkgs = pkgs;
+              imports = [
+                ntlib.module
+              ];
+            };
+            roots = [
+              {
+                url = "https://gitlab.com/TECHNOFAB/nixtest/-/blob/main/lib";
+                path = toString ./lib;
+              }
+            ];
+          };
+          optionsDocs = pkgs.runCommand "options-docs" {} ''
+            mkdir -p $out
+            ln -s ${optionsDoc} $out/options.md
+          '';
         };
       };
     };
@@ -235,7 +222,6 @@
     nix-gitlab-ci.url = "gitlab:technofab/nix-gitlab-ci/2.0.1?dir=lib";
     nix-devtools.url = "gitlab:technofab/nix-devtools?dir=lib";
     nix-mkdocs.url = "gitlab:technofab/nixmkdocs?dir=lib";
-    mkdocs-material-umami.url = "gitlab:technofab/mkdocs-material-umami";
   };
 
   nixConfig = {

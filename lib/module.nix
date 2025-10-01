@@ -13,6 +13,7 @@
     removePrefix
     assertMsg
     generators
+    literalExpression
     ;
 
   nixtest-lib = import ./default.nix {inherit pkgs lib;};
@@ -27,6 +28,18 @@
     _type = "unset";
   };
   isUnset = isType "unset";
+  unsetOr = typ:
+    (types.either unsetType typ)
+    // {
+      inherit (typ) description getSubOptions;
+    };
+  mkUnsetOption = opts:
+    mkOption (opts
+      // {
+        type = unsetOr opts.type;
+        default = opts.default or unset;
+        defaultText = literalExpression "unset";
+      });
 
   filterUnset = value:
     if builtins.isAttrs value && !builtins.hasAttr "_type" value
@@ -45,8 +58,11 @@
     ...
   }: {
     options = {
-      pos = mkOption {
-        type = types.either types.attrs unsetType;
+      pos = mkUnsetOption {
+        type = types.attrs;
+        description = ''
+          Position of test, use `__curPos` for automatic insertion of current position.
+        '';
         default = pos;
         apply = val:
           if isUnset val
@@ -57,6 +73,9 @@
       };
       type = mkOption {
         type = types.enum ["unit" "snapshot" "script"];
+        description = ''
+          Type of test, has to be one of "unit", "snapshot" or "script".
+        '';
         default = "unit";
         apply = value:
           assert assertMsg (value != "script" || !isUnset config.script)
@@ -76,43 +95,66 @@
       };
       name = mkOption {
         type = types.str;
+        description = ''
+          Name of this test.
+        '';
       };
-      description = mkOption {
-        type = types.either types.str unsetType;
-        default = unset;
+      description = mkUnsetOption {
+        type = types.str;
+        description = ''
+          Short description of the test.
+        '';
       };
       format = mkOption {
         type = types.enum ["json" "pretty"];
+        description = ''
+          Which format to use for serializing arbitrary values.
+          Required since this config is serialized to JSON for passing it to Nixtest, so no Nix-values can be used directly.
+
+          - `json`: serializes the data to json using `builtins.toJSON`
+          - `pretty`: serializes the data to a "pretty" format using `lib.generators.toPretty`
+        '';
         default = "json";
       };
-      expected = mkOption {
+      expected = mkUnsetOption {
         type = types.anything;
-        default = unset;
+        description = ''
+          Expected value of the test. Remember, the values are serialized (see [here](#suitesnametestsformat)).
+        '';
         apply = val:
           if isUnset val || config.format == "json"
           then val
           else generators.toPretty {} val;
       };
-      actual = mkOption {
+      actual = mkUnsetOption {
         type = types.anything;
-        default = unset;
+        description = ''
+          Actual value of the test. Remember, the values are serialized (see [here](#suitesnametestsformat)).
+        '';
         apply = val:
           if isUnset val || config.format == "json"
           then val
           else generators.toPretty {} val;
       };
-      actualDrv = mkOption {
-        type = types.either types.package unsetType;
-        default = unset;
+      actualDrv = mkUnsetOption {
+        type = types.package;
+        description = ''
+          Actual value of the test, but as a derivation.
+          Nixtest will build this derivation when running the test, then compare the contents of the
+          resulting file to the [`expected`](#suitesnametestsexpected) value.
+        '';
         apply = val:
         # keep unset value
           if isUnset val
           then val
           else builtins.unsafeDiscardStringContext (val.drvPath or "");
       };
-      script = mkOption {
-        type = types.either types.str unsetType;
-        default = unset;
+      script = mkUnsetOption {
+        type = types.str;
+        description = ''
+          Script to run for the test.
+          Nixtest will run this, failing the test if it exits with a non-zero exit code.
+        '';
         apply = val:
           if isUnset val
           then val
@@ -132,11 +174,19 @@
     options = {
       name = mkOption {
         type = types.str;
+        description = ''
+          Name of the suite, uses attrset name by default.
+        '';
         default = name;
+        defaultText = literalExpression name;
       };
-      pos = mkOption {
-        type = types.either types.attrs unsetType;
-        default = unset;
+      pos = mkUnsetOption {
+        type = types.attrs;
+        description = ''
+          Position for tests, use `__curPos` for automatic insertion of current position.
+          This will set `pos` for every test of this suite, useful if the suite's tests are all in a single file.
+        '';
+        example = literalExpression "__curPos";
       };
       tests = mkOption {
         type = types.listOf (types.submoduleWith {
@@ -146,6 +196,9 @@
             inherit testsBase;
           };
         });
+        description = ''
+          Define tests of this suite here.
+        '';
         default = [];
       };
     };
@@ -154,12 +207,18 @@
   nixtestSubmodule = {config, ...}: {
     options = {
       base = mkOption {
-        description = "Base directory of the tests, will be removed from the test file path";
         type = types.str;
+        description = ''
+          Base directory of the tests, will be removed from the test file path.
+          This makes it possible to show the relative path from the git repo, instead of ugly Nix store paths.
+        '';
         default = "";
       };
       skip = mkOption {
         type = types.str;
+        description = ''
+          Tests to skip, is passed to Nixtest's `--skip` param.
+        '';
         default = "";
       };
       suites = mkOption {
@@ -169,12 +228,22 @@
             testsBase = config.base;
           };
         });
+        description = ''
+          Define your test suites here, every test belongs to a suite.
+        '';
         default = {};
         apply = suites:
           map (
             n: filterUnset (builtins.removeAttrs suites.${n} ["pos"])
           )
           (builtins.attrNames suites);
+        example = {
+          "Suite A".tests = [
+            {
+              name = "Some Test";
+            }
+          ];
+        };
       };
 
       finalConfigJson = mkOption {
