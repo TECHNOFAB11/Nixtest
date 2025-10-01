@@ -72,6 +72,8 @@
           ''
             ${ntlib.helpers.path [pkgs.gnugrep pkgs.mktemp pkgs.coreutils]}
             ${ntlib.helpers.scriptHelpers}
+            export SSL_CERT_FILE=${pkgs.cacert}/etc/ssl/certs/ca-bundle.crt
+            export NIX_SSL_CERT_FILE=${pkgs.cacert}/etc/ssl/certs/ca-bundle.crt
             cp -r ${./../snapshots} snapshots
 
             # start without nix & env binaries to expect errors
