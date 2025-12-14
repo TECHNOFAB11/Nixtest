@@ -9,10 +9,10 @@ import (
 	"time"
 
 	"github.com/rs/zerolog/log"
-	"gitlab.com/technofab/nixtest/internal/nix"
-	"gitlab.com/technofab/nixtest/internal/snapshot"
-	"gitlab.com/technofab/nixtest/internal/types"
-	"gitlab.com/technofab/nixtest/internal/util"
+	"gitlab.com/TECHNOFAB/nixtest/internal/nix"
+	"gitlab.com/TECHNOFAB/nixtest/internal/snapshot"
+	"gitlab.com/TECHNOFAB/nixtest/internal/types"
+	"gitlab.com/TECHNOFAB/nixtest/internal/util"
 )
 
 // Runner executes tests based on provided specifications and configuration

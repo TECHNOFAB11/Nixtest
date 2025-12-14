@@ -1,4 +1,4 @@
-module gitlab.com/technofab/nixtest
+module gitlab.com/TECHNOFAB/nixtest
 
 go 1.23.0
 

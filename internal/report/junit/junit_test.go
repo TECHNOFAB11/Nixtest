@@ -9,7 +9,7 @@ import (
 	"testing"
 	"time"
 
-	"gitlab.com/technofab/nixtest/internal/types"
+	"gitlab.com/TECHNOFAB/nixtest/internal/types"
 )
 
 func formatDurationSeconds(d time.Duration) string {

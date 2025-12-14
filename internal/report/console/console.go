@@ -11,8 +11,8 @@ import (
 	"github.com/jedib0t/go-pretty/v6/text"
 	"github.com/rs/zerolog/log"
 	"github.com/sergi/go-diff/diffmatchpatch"
-	"gitlab.com/technofab/nixtest/internal/types"
-	"gitlab.com/technofab/nixtest/internal/util"
+	"gitlab.com/TECHNOFAB/nixtest/internal/types"
+	"gitlab.com/TECHNOFAB/nixtest/internal/util"
 )
 
 // PrintErrors prints error messages for failed tests

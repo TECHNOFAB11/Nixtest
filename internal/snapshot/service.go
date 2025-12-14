@@ -7,8 +7,8 @@ import (
 	"path/filepath"
 	"strings"
 
-	apperrors "gitlab.com/technofab/nixtest/internal/errors"
-	"gitlab.com/technofab/nixtest/internal/util"
+	apperrors "gitlab.com/TECHNOFAB/nixtest/internal/errors"
+	"gitlab.com/TECHNOFAB/nixtest/internal/util"
 )
 
 // Service defines operations related to test snapshots

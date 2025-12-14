@@ -7,8 +7,8 @@ import (
 	"strings"
 	"time"
 
-	"gitlab.com/technofab/nixtest/internal/types"
-	"gitlab.com/technofab/nixtest/internal/util"
+	"gitlab.com/TECHNOFAB/nixtest/internal/types"
+	"gitlab.com/TECHNOFAB/nixtest/internal/util"
 )
 
 type JUnitReport struct {

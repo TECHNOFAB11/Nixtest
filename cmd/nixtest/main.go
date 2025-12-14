@@ -3,14 +3,14 @@ package main
 import (
 	"os"
 
-	"gitlab.com/technofab/nixtest/internal/config"
-	appnix "gitlab.com/technofab/nixtest/internal/nix"
-	"gitlab.com/technofab/nixtest/internal/report/console"
-	"gitlab.com/technofab/nixtest/internal/report/junit"
-	"gitlab.com/technofab/nixtest/internal/runner"
-	appsnap "gitlab.com/technofab/nixtest/internal/snapshot"
-	"gitlab.com/technofab/nixtest/internal/types"
-	"gitlab.com/technofab/nixtest/internal/util"
+	"gitlab.com/TECHNOFAB/nixtest/internal/config"
+	appnix "gitlab.com/TECHNOFAB/nixtest/internal/nix"
+	"gitlab.com/TECHNOFAB/nixtest/internal/report/console"
+	"gitlab.com/TECHNOFAB/nixtest/internal/report/junit"
+	"gitlab.com/TECHNOFAB/nixtest/internal/runner"
+	appsnap "gitlab.com/TECHNOFAB/nixtest/internal/snapshot"
+	"gitlab.com/TECHNOFAB/nixtest/internal/types"
+	"gitlab.com/TECHNOFAB/nixtest/internal/util"
 
 	"github.com/rs/zerolog"
 	"github.com/rs/zerolog/log"

@@ -8,7 +8,7 @@ import (
 
 	"github.com/akedrou/textdiff"
 	"github.com/akedrou/textdiff/myers"
-	apperrors "gitlab.com/technofab/nixtest/internal/errors"
+	apperrors "gitlab.com/TECHNOFAB/nixtest/internal/errors"
 )
 
 func ComputeDiff(expected, actual string) (string, error) {

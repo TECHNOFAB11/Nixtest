@@ -12,7 +12,7 @@ import (
 	"time"
 
 	"github.com/jedib0t/go-pretty/v6/text"
-	"gitlab.com/technofab/nixtest/internal/types"
+	"gitlab.com/TECHNOFAB/nixtest/internal/types"
 )
 
 // captureOutput captures stdout and stderr during the execution of a function

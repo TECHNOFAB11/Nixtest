@@ -8,7 +8,7 @@ import (
 	"os/exec"
 	"strings"
 
-	apperrors "gitlab.com/technofab/nixtest/internal/errors"
+	apperrors "gitlab.com/TECHNOFAB/nixtest/internal/errors"
 )
 
 // Service defines operations related to Nix

@@ -9,7 +9,7 @@ import (
 	"strings"
 	"testing"
 
-	apperrors "gitlab.com/technofab/nixtest/internal/errors"
+	apperrors "gitlab.com/TECHNOFAB/nixtest/internal/errors"
 )
 
 func TestDefaultService_GetPath(t *testing.T) {

@@ -9,8 +9,8 @@ import (
 	"testing"
 	"time"
 
-	apperrors "gitlab.com/technofab/nixtest/internal/errors"
-	"gitlab.com/technofab/nixtest/internal/types"
+	apperrors "gitlab.com/TECHNOFAB/nixtest/internal/errors"
+	"gitlab.com/TECHNOFAB/nixtest/internal/types"
 )
 
 // --- Mock Service Implementations ---
