@@ -1,0 +1,23 @@
+{
+  "extends": [
+    "config:recommended"
+  ],
+  "gitlabci": {
+    "enabled": false
+  },
+  "lockFileMaintenance": {
+    "enabled": true,
+    "extends": [
+      "schedule:monthly"
+    ]
+  },
+  "nix": {
+    "enabled": true
+  },
+  "postUpgradeTasks": {
+    "commands": [
+      "nix-portable nix run .#update-package",
+      "nix-portable nix run .#soonix:update"
+    ]
+  }
+}

@@ -4,7 +4,8 @@
   ...
 }:
 buildGoModule {
-  name = "nixtest";
+  pname = "nixtest";
+  version = "latest";
   src =
     # filter everything except for cmd/ and go.mod, go.sum
     with lib.fileset;
