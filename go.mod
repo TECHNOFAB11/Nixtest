@@ -5,7 +5,7 @@ go 1.23.0
 require (
 	github.com/akedrou/textdiff v0.1.0
 	github.com/rs/zerolog v1.34.0
-	github.com/spf13/pflag v1.0.6
+	github.com/spf13/pflag v1.0.10
 	github.com/stretchr/testify v1.11.1
 )
 
