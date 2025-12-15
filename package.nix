@@ -19,6 +19,6 @@ buildGoModule {
         ];
       };
   subPackages = ["cmd/nixtest"];
-  vendorHash = "sha256-uyVSXUSoDfOhRxrtUd6KQWmx6I8kw3PJxKfYMZgz3h8=";
+  vendorHash = "sha256-TtsIoXMBjMU/AlILgWcyv5TwYuBSdoyDbKrOdnJbdKQ=";
   meta.mainProgram = "nixtest";
 }
