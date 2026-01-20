@@ -49,6 +49,39 @@
             grep -q "test" ${builtins.toFile "test" "test"}
           '';
         }
+        {
+          name = "test-vm";
+          type = "vm";
+          vmConfig = {
+            nodes.machine = {pkgs, ...}: {
+              services.nginx = {
+                enable = true;
+                virtualHosts."localhost" = {
+                  root = pkgs.writeTextDir "index.html" "Hello from nixtest VM!";
+                };
+              };
+            };
+            testScript =
+              # py
+              ''
+                machine.wait_for_unit("nginx.service")
+                machine.wait_for_open_port(80)
+                machine.succeed("curl -f http://localhost | grep 'Hello from nixtest VM!'")
+              '';
+          };
+        }
+        {
+          name = "vm-fail";
+          type = "vm";
+          vmConfig = {
+            nodes.machine = {};
+            testScript =
+              # py
+              ''
+                machine.succeed("curl -f http://localhost | grep 'Hello from nixtest VM!'")
+              '';
+          };
+        }
       ];
     };
     "other-suite".tests = [

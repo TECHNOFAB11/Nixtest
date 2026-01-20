@@ -89,9 +89,10 @@
             assert "-f junit2.xml" "should create junit2.xml"
             assert_not_contains "$output" "executable file not found" "nix should now exist"
             assert_contains "$output" "suite-one" "should contain suite-one"
-            assert_contains "$output" "8/11 (1 SKIPPED)" "should be 8/11 total"
+            assert_contains "$output" "9/13 (1 SKIPPED)" "should be 9/13 total"
             assert_contains "$output" "ERROR" "should contain an error"
             assert_contains "$output" "SKIP" "should contain a skip"
+            assert_contains "$output" "RequestedAssertionFailed" "vm-fail test should fail"
           '';
       }
     ];
