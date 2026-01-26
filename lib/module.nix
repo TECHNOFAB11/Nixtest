@@ -14,6 +14,7 @@
     assertMsg
     generators
     literalExpression
+    xor
     ;
 
   nixtest-lib = import ./default.nix {inherit pkgs lib;};
@@ -72,25 +73,17 @@
           in "${fileRelative}:${toString val.line}";
       };
       type = mkOption {
-        type = types.enum ["unit" "snapshot" "script"];
+        type = types.enum ["unit" "snapshot" "script" "vm"];
         description = ''
-          Type of test, has to be one of "unit", "snapshot" or "script".
+          Type of test, has to be one of "unit", "snapshot", "script", or "vm".
         '';
         default = "unit";
         apply = value:
-          assert assertMsg (value != "script" || !isUnset config.script)
+          assert assertMsg (value == "script" -> !isUnset config.script)
           "test '${config.name}' as type 'script' requires 'script' to be set";
-          assert assertMsg (value != "unit" || !isUnset config.expected)
+          assert assertMsg (value == "unit" -> !isUnset config.expected)
           "test '${config.name}' as type 'unit' requires 'expected' to be set";
-          assert assertMsg (
-            let
-              actualIsUnset = isUnset config.actual;
-              actualDrvIsUnset = isUnset config.actualDrv;
-            in
-              (value != "unit")
-              || (!actualIsUnset && actualDrvIsUnset)
-              || (actualIsUnset && !actualDrvIsUnset)
-          )
+          assert assertMsg (value == "unit" -> (xor (isUnset config.actual) (isUnset config.actualDrv)))
           "test '${config.name}' as type 'unit' requires only 'actual' OR 'actualDrv' to be set"; value;
       };
       name = mkOption {
@@ -162,6 +155,59 @@
             builtins.unsafeDiscardStringContext
             (pkgs.writeShellScript "nixtest-${config.name}" val).drvPath;
       };
+      vmConfig = mkUnsetOption {
+        type = types.attrs;
+        description = ''
+          Configuration for `pkgs.testers.nixosText`.
+        '';
+        example = {
+          nodes.machine = {
+            services.nginx.enable = true;
+          };
+          testScript =
+            # py
+            ''
+              machine.wait_for_unit("nginx.service")
+              machine.wait_for_open_port(80)
+            '';
+        };
+      };
+
+      finalConfig = mkOption {
+        internal = true;
+        type = types.attrs;
+      };
+    };
+    config = {
+      finalConfig = builtins.addErrorContext "[nixtest] while processing test ${config.name}" {
+        inherit (config) name expected actual actualDrv;
+        type =
+          if config.type == "vm"
+          then "script"
+          else config.type;
+        script =
+          if config.type == "vm"
+          then
+            assert assertMsg ((!isUnset config.vmConfig) && (config.vmConfig ? nodes) && (config.vmConfig ? testScript))
+            "test '${config.name}' as type 'vm' requires 'vmConfig' to be set and contain 'nodes' & 'testScript'"; let
+              inherit
+                (pkgs.testers.nixosTest (
+                  {
+                    name = "nixtest-vm-${config.name}";
+                  }
+                  // config.vmConfig
+                ))
+                driver
+                ;
+            in
+              builtins.unsafeDiscardStringContext
+              (pkgs.writeShellScript "nixtest-vm-${config.name}" ''
+                # use different TMPDIR to prevent race conditions:
+                #  vde_switch: Could not bind to socket '/tmp/vde1.ctl/ctl': Address already in use
+                TMPDIR=$(${pkgs.coreutils}/bin/mktemp -d) ${driver}/bin/nixos-test-driver
+              '').drvPath
+          else config.script;
+      };
     };
   };
 
@@ -201,6 +247,17 @@
         '';
         default = [];
       };
+
+      finalConfig = mkOption {
+        internal = true;
+        type = types.attrs;
+      };
+    };
+    config = {
+      finalConfig = builtins.addErrorContext "[nixtest] while processing suite ${config.name}" {
+        inherit (config) name;
+        tests = map (test: test.finalConfig) config.tests;
+      };
     };
   };
 
@@ -233,11 +290,6 @@
           Define your test suites here, every test belongs to a suite.
         '';
         default = {};
-        apply = suites:
-          map (
-            n: filterUnset (builtins.removeAttrs suites.${n} ["pos"])
-          )
-          (builtins.attrNames suites);
         example = {
           "Suite A".tests = [
             {
@@ -247,6 +299,10 @@
         };
       };
 
+      finalConfig = mkOption {
+        internal = true;
+        type = types.listOf types.attrs;
+      };
       finalConfigJson = mkOption {
         internal = true;
         type = types.package;
@@ -257,11 +313,18 @@
       };
     };
     config = {
-      finalConfigJson = nixtest-lib.exportSuites config.suites;
-      app = nixtest-lib.mkBinary {
-        nixtests = config.finalConfigJson;
-        extraParams = ''--skip="${config.skip}"'';
-      };
+      finalConfig = map (suite: filterUnset suite.finalConfig) (builtins.attrValues config.suites);
+      finalConfigJson =
+        builtins.addErrorContext "[nixtest] while exporting suites"
+        (nixtest-lib.exportSuites config.finalConfig);
+      app =
+        (nixtest-lib.mkBinary {
+          nixtests = config.finalConfigJson;
+          extraParams = ''--skip="${config.skip}"'';
+        })
+        // {
+          rawTests = config.finalConfig;
+        };
     };
   };
 in

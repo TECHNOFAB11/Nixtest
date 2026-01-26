@@ -64,6 +64,7 @@ There are currently 3 types of tests:
 - `snapshot` -> snapshot testing, only needs `actual` and compares that to the snapshot
 - `unit` -> equality checking, needs `expected` and `actual` or `actualDrv`
 - `script` -> shell script test, needs `script`
+- `vm` -> NixOS VM test, needs `vmConfig`
 
 Examples:
 
@@ -125,6 +126,23 @@ Examples:
     pos = __curPos;
     expected = pkgs.hello;
     actual = pkgs.hello;
+  }
+  {
+    name = "vm-test";
+    type = "vm";
+    # gets passed to pkgs.testers.nixosTest, so same params apply
+    # name gets automatically set, so thats not required
+    vmConfig = {
+      nodes.machine = {
+        services.nginx.enable = true;
+      };
+      testScript =
+        # py
+        ''
+          machine.wait_for_unit("nginx.service")
+          machine.wait_for_open_port(80)
+        '';
+    };
   }
 ]
 ```
