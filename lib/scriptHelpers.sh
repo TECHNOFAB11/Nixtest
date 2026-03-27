@@ -11,16 +11,16 @@ function assert_not_eq() {
   assert "$1 -ne $2" "$3"
 }
 function assert_contains() {
-  echo "$1" | grep -q -- "$2" || {
-    echo "Assertion failed: $3. $1 does not contain $2" >&2;
+  echo -n "$1" | grep -q -- "$2" || {
+    echo "Assertion failed: $3. The following does not contain $2: $1" >&2;
     exit 1;
   }
 }
 function assert_not_contains() {
-  echo "$1" | grep -q -- "$2" && {
-    echo "Assertion failed: $3. $1 does contain $2" >&2;
+  echo -n "$1" | grep -q -- "$2" && {
+    echo "Assertion failed: $3. The following does contain $2: $1" >&2;
     exit 1;
-  }
+  } || true
 }
 function assert_file_contains() {
   grep -q -- "$2" $1 || {
