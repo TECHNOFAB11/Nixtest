@@ -10,7 +10,6 @@ import (
 	"github.com/jedib0t/go-pretty/v6/table"
 	"github.com/jedib0t/go-pretty/v6/text"
 	"github.com/rs/zerolog/log"
-	"github.com/sergi/go-diff/diffmatchpatch"
 	"gitlab.com/TECHNOFAB/nixtest/internal/types"
 	"gitlab.com/TECHNOFAB/nixtest/internal/util"
 )
@@ -25,16 +24,10 @@ func PrintErrors(results types.Results, noColor bool) {
 			fmt.Println(text.FgRed.Sprintf("⚠ Test \"%s/%s\" failed:", result.Spec.Suite, result.Spec.Name))
 			message := result.ErrorMessage
 			if result.Status == types.StatusFailure && message == "" {
-				if noColor {
-					var err error
-					message, err = util.ComputeDiff(result.Expected, result.Actual)
-					if err != nil {
-						log.Panic().Err(err).Msg("failed to compute diff")
-					}
-				} else {
-					dmp := diffmatchpatch.New()
-					diffs := dmp.DiffMain(result.Expected, result.Actual, true)
-					message = fmt.Sprintf("Diff:\n%s", dmp.DiffPrettyText(diffs))
+				var err error
+				message, err = util.ComputeDiff(result.Expected, result.Actual)
+				if err != nil {
+					log.Panic().Err(err).Msg("failed to compute diff")
 				}
 			}
 
