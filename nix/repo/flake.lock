@@ -3,16 +3,17 @@
     "devshell-lib": {
       "locked": {
         "dir": "lib",
-        "lastModified": 1767274074,
-        "narHash": "sha256-h2grM9qoSnYdqN7K8+taeMuWC2umaN/c2FCBu48frlo=",
+        "lastModified": 1767218348,
+        "narHash": "sha256-8MJqwH9sRMuHH+RsB7iqWyWD30TgmpiYKEvegAULggs=",
         "owner": "rensa-nix",
         "repo": "devshell",
-        "rev": "5508ced269ee40ff7f5261ee3b5bf5597f7cad5d",
+        "rev": "7a9b7e5d9f162a1fa3edfdc0169cdc29d3a67f8e",
         "type": "gitlab"
       },
       "original": {
         "dir": "lib",
         "owner": "rensa-nix",
+        "ref": "v0.1.0",
         "repo": "devshell",
         "type": "gitlab"
       }
@@ -38,16 +39,17 @@
     "nixmkdocs-lib": {
       "locked": {
         "dir": "lib",
-        "lastModified": 1766404754,
-        "narHash": "sha256-EjBe6x6BT8ckPirMWhSf1GfaFxORYxR/Uu71FvSAm60=",
+        "lastModified": 1767549915,
+        "narHash": "sha256-by3r2qddlyzylup5fzSaDwtoy3eFHNKb65IuIq6bsAs=",
         "owner": "TECHNOFAB",
         "repo": "nixmkdocs",
-        "rev": "cfa9606eeeb9288e2799896d7d42b3d3860f9ccb",
+        "rev": "f3b2f4b19178e97c5580367be0f97e61a085db6d",
         "type": "gitlab"
       },
       "original": {
         "dir": "lib",
         "owner": "TECHNOFAB",
+        "ref": "v1.1.0",
         "repo": "nixmkdocs",
         "type": "gitlab"
       }
@@ -64,16 +66,17 @@
     "soonix-lib": {
       "locked": {
         "dir": "lib",
-        "lastModified": 1767274116,
-        "narHash": "sha256-8+VeMokZHjOLs6fRUTj/9uxbMlHKDl384Tk6K8Qjm4k=",
+        "lastModified": 1769607658,
+        "narHash": "sha256-gF9/QmmaNRgqkC5cqSGgwWvGXj9Mj4qMDkvvF/5BlSA=",
         "owner": "TECHNOFAB",
         "repo": "soonix",
-        "rev": "56f281eea45bdcf29674adfa7962f14e490a6051",
+        "rev": "19a88a0c2681bbc85bc2cbe4f2860316d50fe957",
         "type": "gitlab"
       },
       "original": {
         "dir": "lib",
         "owner": "TECHNOFAB",
+        "ref": "v0.2.0",
         "repo": "soonix",
         "type": "gitlab"
       }
