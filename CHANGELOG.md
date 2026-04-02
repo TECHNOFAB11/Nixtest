@@ -2,6 +2,25 @@
 All notable changes to this project will be documented in this file. See [conventional commits](https://www.conventionalcommits.org/) for commit guidelines.
 
 - - -
+## [v1.3.0](https://gitlab.com/TECHNOFAB/nixtest/compare/dab1e2ef6f49d91174216aed8216aa98f9a071ed..v1.3.0) - 2026-04-02
+#### Features
+- add support for running NixOS VM tests more easily - ([c64e0cc](https://gitlab.com/TECHNOFAB/nixtest/commit/c64e0cce0c5ba9d77597f20f002d1375deb8e577)) - [@TECHNOFAB](https://gitlab.com/TECHNOFAB)
+#### Bug Fixes
+- (**deps**) update module github.com/rs/zerolog to v1.35.0 - ([58d6539](https://gitlab.com/TECHNOFAB/nixtest/commit/58d6539addaf872d5a9002b05b9ab547d205aea9)) - Renovate Bot
+- (**deps**) update module github.com/jedib0t/go-pretty/v6 to v6.7.8 - ([98250aa](https://gitlab.com/TECHNOFAB/nixtest/commit/98250aa7e7cb94633af7da483aad43098aa0109c)) - Renovate Bot
+- (**deps**) update module github.com/sergi/go-diff to v1.4.0 - ([b098895](https://gitlab.com/TECHNOFAB/nixtest/commit/b0988954c70ef059dc6501b09b4d116567442a16)) - Renovate Bot
+- (**deps**) update module github.com/jedib0t/go-pretty/v6 to v6.7.7 - ([056851d](https://gitlab.com/TECHNOFAB/nixtest/commit/056851d6c6303517f79207bed1d7c64d1e584cb6)) - Renovate Bot
+- (**deps**) update module github.com/spf13/pflag to v1.0.10 - ([be32005](https://gitlab.com/TECHNOFAB/nixtest/commit/be32005bc74bf9bfd5856cc4c2e33bdf2bce3090)) - Renovate Bot
+- (**deps**) update module github.com/stretchr/testify to v1.11.1 - ([dab1e2e](https://gitlab.com/TECHNOFAB/nixtest/commit/dab1e2ef6f49d91174216aed8216aa98f9a071ed)) - Renovate Bot
+- (**scriptHelpers**) remove \n from echo & fix not_contains failing shell - ([fe5d9f4](https://gitlab.com/TECHNOFAB/nixtest/commit/fe5d9f421e6afd23cc60a960d82bda226415c2be)) - [@TECHNOFAB](https://gitlab.com/TECHNOFAB)
+#### Miscellaneous Chores
+- (**deps**) lock file maintenance - ([e25fb0c](https://gitlab.com/TECHNOFAB/nixtest/commit/e25fb0c609811d15a529be8446c0f627a22cf452)) - Renovate Bot
+- (**flakes**) pin input versions/tags - ([cee15f3](https://gitlab.com/TECHNOFAB/nixtest/commit/cee15f367744de3fe9944d7fe2d6546b7708e816)) - [@TECHNOFAB](https://gitlab.com/TECHNOFAB)
+- add devtools like cocogitto & lefthook - ([e91a977](https://gitlab.com/TECHNOFAB/nixtest/commit/e91a9774e84419fec276f049b7bb64379f4f87bc)) - [@TECHNOFAB](https://gitlab.com/TECHNOFAB)
+- remove colored diff since its buggy anyways - ([43f4f33](https://gitlab.com/TECHNOFAB/nixtest/commit/43f4f33838f21a0d5424f2b13b5a6cb71b24aa65)) - [@TECHNOFAB](https://gitlab.com/TECHNOFAB)
+
+- - -
+
 
 ## [v1.2.1](https://gitlab.com/TECHNOFAB/nixtest/compare/v1.2.0..v1.2.1) - 2026-04-02
 #### Documentation
