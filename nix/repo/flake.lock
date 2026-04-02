@@ -18,6 +18,24 @@
         "type": "gitlab"
       }
     },
+    "devtools-lib": {
+      "locked": {
+        "dir": "lib",
+        "lastModified": 1767214272,
+        "narHash": "sha256-gvW7flZ60xdv3Z3Ksec5jcRjW2sqRHsGoJdwsNWQVPk=",
+        "owner": "rensa-nix",
+        "repo": "devtools",
+        "rev": "f40e59c32c48cdbf4cbc621c2f0f11e7bb80dbd3",
+        "type": "gitlab"
+      },
+      "original": {
+        "dir": "lib",
+        "owner": "rensa-nix",
+        "ref": "v0.1.0",
+        "repo": "devtools",
+        "type": "gitlab"
+      }
+    },
     "nix-gitlab-ci-lib": {
       "locked": {
         "dir": "lib",
@@ -57,6 +75,7 @@
     "root": {
       "inputs": {
         "devshell-lib": "devshell-lib",
+        "devtools-lib": "devtools-lib",
         "nix-gitlab-ci-lib": "nix-gitlab-ci-lib",
         "nixmkdocs-lib": "nixmkdocs-lib",
         "soonix-lib": "soonix-lib",
