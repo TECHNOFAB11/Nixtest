@@ -73,9 +73,9 @@
           in "${fileRelative}:${toString val.line}";
       };
       type = mkOption {
-        type = types.enum ["unit" "snapshot" "script" "vm"];
+        type = types.enum ["unit" "snapshot" "script" "assertions" "vm"];
         description = ''
-          Type of test, has to be one of "unit", "snapshot", "script", or "vm".
+          Type of test, has to be one of "unit", "snapshot", "script", "assertions", or "vm".
         '';
         default = "unit";
         apply = value:
@@ -84,7 +84,9 @@
           assert assertMsg (value == "unit" -> !isUnset config.expected)
           "test '${config.name}' as type 'unit' requires 'expected' to be set";
           assert assertMsg (value == "unit" -> (xor (isUnset config.actual) (isUnset config.actualDrv)))
-          "test '${config.name}' as type 'unit' requires only 'actual' OR 'actualDrv' to be set"; value;
+          "test '${config.name}' as type 'unit' requires only 'actual' OR 'actualDrv' to be set";
+          assert assertMsg (value == "assertions" -> !isUnset config.assertions)
+          "test '${config.name}' as type 'assertions' requires 'assertions' to be set"; value;
       };
       name = mkOption {
         type = types.str;
@@ -172,6 +174,16 @@
             '';
         };
       };
+      assertions = mkUnsetOption {
+        type = types.attrsOf (types.oneOf [types.bool types.str types.attrs]);
+        description = ''
+          Attribute set of assertions to run for this test.
+          Each assertion can evaluate to:
+          - boolean (`true` for pass, `false` for fail)
+          - string (custom failure message)
+          - matcher result attrset (e.g. from `ntlib.asserts.*`)
+        '';
+      };
 
       finalConfig = mkOption {
         internal = true;
@@ -180,11 +192,75 @@
     };
     config = {
       finalConfig = builtins.addErrorContext "[nixtest] while processing test ${config.name}" {
-        inherit (config) name expected actual actualDrv;
+        inherit (config) name expected actual actualDrv pos description;
         type =
           if config.type == "vm"
           then "script"
           else config.type;
+        assertions =
+          if config.type == "assertions"
+          then
+            assert assertMsg (!isUnset config.assertions)
+            "test '${config.name}' as type 'assertions' requires 'assertions' to be set";
+            assert assertMsg (builtins.isAttrs config.assertions)
+            "test '${config.name}' assertions must be an attribute set";
+              builtins.mapAttrs (
+                assertName: assertionExpr: let
+                  evalRes = builtins.tryEval assertionExpr;
+                in
+                  if !evalRes.success
+                  then {
+                    ok = false;
+                    error = true;
+                    message = "Nix evaluation error (expression threw or aborted)";
+                  }
+                  else let
+                    val = evalRes.value;
+                  in
+                    if builtins.isBool val
+                    then {
+                      ok = val;
+                      message =
+                        if val
+                        then ""
+                        else "Assertion evaluated to false";
+                    }
+                    else if builtins.isString val
+                    then {
+                      ok = false;
+                      message = val;
+                    }
+                    else if builtins.isAttrs val && (val ? ok)
+                    then {
+                      ok = val.ok;
+                      error = val.error or false;
+                      message = val.message or "";
+                      expected =
+                        if val ? expected
+                        then
+                          (
+                            if builtins.isString val.expected
+                            then val.expected
+                            else generators.toPretty {} val.expected
+                          )
+                        else "";
+                      actual =
+                        if val ? actual
+                        then
+                          (
+                            if builtins.isString val.actual
+                            then val.actual
+                            else generators.toPretty {} val.actual
+                          )
+                        else "";
+                    }
+                    else {
+                      ok = false;
+                      message = "Invalid assertion return type: expected boolean, failure message string, or matcher result";
+                    }
+              )
+              config.assertions
+          else unset;
         script =
           if config.type == "vm"
           then

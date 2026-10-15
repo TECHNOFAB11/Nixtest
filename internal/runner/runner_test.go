@@ -271,6 +271,71 @@ func TestRunner_executeTest(t *testing.T) {
 			wantStatus:         types.StatusFailure,
 			wantErrMsgContains: "[exit code 1]\n[stdout]\nout on fail\n[stderr]\nerr on fail",
 		},
+		// --- Assertions Tests ---
+		{
+			name: "Assertions test all success",
+			spec: types.TestSpec{
+				Name: "AssertionsSuccess",
+				Type: types.TestTypeAssertions,
+				Assertions: map[string]types.AssertionResult{
+					"should be true": {Ok: true},
+					"should match":   {Ok: true},
+				},
+			},
+			runnerConfig:      Config{},
+			setupMockServices: func(t *testing.T, mNix *mockNixService, mSnap *mockSnapshotService, s types.TestSpec, c Config) {},
+			wantStatus:        types.StatusSuccess,
+		},
+		{
+			name: "Assertions test with failure",
+			spec: types.TestSpec{
+				Name: "AssertionsFail",
+				Type: types.TestTypeAssertions,
+				Assertions: map[string]types.AssertionResult{
+					"should pass": {Ok: true},
+					"should fail": {
+						Ok:       false,
+						Message:  "Expected values to be equal",
+						Expected: "10",
+						Actual:   "5",
+					},
+				},
+			},
+			runnerConfig:       Config{},
+			setupMockServices:  func(t *testing.T, mNix *mockNixService, mSnap *mockSnapshotService, s types.TestSpec, c Config) {},
+			wantStatus:         types.StatusFailure,
+			wantErrMsgContains: "❌ \"should fail\"\n   Expected values to be equal\n   Expected: 10\n   Actual:   5",
+		},
+		{
+			name: "Assertions test with eval error",
+			spec: types.TestSpec{
+				Name: "AssertionsError",
+				Type: types.TestTypeAssertions,
+				Assertions: map[string]types.AssertionResult{
+					"eval error": {
+						Ok:      false,
+						Error:   true,
+						Message: "Nix evaluation error (expression threw or aborted)",
+					},
+				},
+			},
+			runnerConfig:       Config{},
+			setupMockServices:  func(t *testing.T, mNix *mockNixService, mSnap *mockSnapshotService, s types.TestSpec, c Config) {},
+			wantStatus:         types.StatusError,
+			wantErrMsgContains: "❌ \"eval error\"\n   Nix evaluation error",
+		},
+		{
+			name: "Assertions test with empty assertions",
+			spec: types.TestSpec{
+				Name:       "AssertionsEmpty",
+				Type:       types.TestTypeAssertions,
+				Assertions: map[string]types.AssertionResult{},
+			},
+			runnerConfig:       Config{},
+			setupMockServices:  func(t *testing.T, mNix *mockNixService, mSnap *mockSnapshotService, s types.TestSpec, c Config) {},
+			wantStatus:         types.StatusError,
+			wantErrMsgContains: "No assertions defined for test",
+		},
 	}
 
 	for _, tt := range tests {

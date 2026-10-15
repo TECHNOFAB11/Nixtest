@@ -144,6 +144,25 @@ Examples:
         '';
     };
   }
+{
+    name = "assertions-test";
+    type = "assertions";
+    assertions = {
+      # Use rich matchers with automatic failure details (available as ntlib.asserts.* or ntlib.expect.*):
+      "equality" = ntlib.asserts.eq 200 response.status;
+      "greater than" = ntlib.asserts.gt config.port 1024;
+      "list contains" = ntlib.asserts.contains config.users "admin";
+      "has attribute" = ntlib.asserts.hasAttr "nginx" config.services;
+      "matches regex" = ntlib.asserts.matches "^v[0-9]+" pkg.version;
+      "throws error" = ntlib.asserts.throws (throw "invalid config");
+
+      # Or simple booleans:
+      "is enabled" = config.enable == true;
+
+      # Or custom failure messages:
+      "memory limit" = if mem > 512 then true else "memory was ${toString mem}MB (expected > 512MB)";
+    };
+  }
 ]
 ```
 

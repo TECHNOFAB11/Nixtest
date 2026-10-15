@@ -5,6 +5,8 @@ import (
 	"fmt"
 	"reflect"
 	"regexp"
+	"sort"
+	"strings"
 	"sync"
 	"time"
 
@@ -133,6 +135,8 @@ func (r *Runner) executeTest(spec types.TestSpec) types.TestResult {
 		r.handleUnitTest(&result, spec, actual)
 	case types.TestTypeScript:
 		r.handleScriptTest(&result, spec)
+	case types.TestTypeAssertions:
+		r.handleAssertionsTest(&result, spec)
 	default:
 		result.Status = types.StatusError
 		result.ErrorMessage = fmt.Sprintf("Invalid test type: %s", spec.Type)
@@ -190,6 +194,62 @@ func (r *Runner) handleScriptTest(result *types.TestResult, spec types.TestSpec)
 	if exitCode != 0 {
 		result.Status = types.StatusFailure
 		result.ErrorMessage = fmt.Sprintf("[exit code %d]\n[stdout]\n%s\n[stderr]\n%s", exitCode, stdout, stderrStr)
+	}
+}
+
+// handleAssertionsTest processes assertions type tests
+func (r *Runner) handleAssertionsTest(result *types.TestResult, spec types.TestSpec) {
+	if len(spec.Assertions) == 0 {
+		result.Status = types.StatusError
+		result.ErrorMessage = "No assertions defined for test"
+		return
+	}
+
+	total := len(spec.Assertions)
+	failed := 0
+	errored := 0
+
+	names := make([]string, 0, total)
+	for name := range spec.Assertions {
+		names = append(names, name)
+	}
+	sort.Strings(names)
+
+	var sb strings.Builder
+	for _, name := range names {
+		assertRes := spec.Assertions[name]
+		if assertRes.Ok {
+			continue
+		}
+		if assertRes.Error {
+			errored++
+		} else {
+			failed++
+		}
+
+		if sb.Len() > 0 {
+			sb.WriteString("\n\n")
+		}
+		fmt.Fprintf(&sb, "❌ \"%s\"", name)
+		if assertRes.Message != "" {
+			fmt.Fprintf(&sb, "\n   %s", assertRes.Message)
+		}
+		if assertRes.Expected != "" {
+			fmt.Fprintf(&sb, "\n   Expected: %s", assertRes.Expected)
+		}
+		if assertRes.Actual != "" {
+			fmt.Fprintf(&sb, "\n   Actual:   %s", assertRes.Actual)
+		}
+	}
+
+	if errored > 0 {
+		result.Status = types.StatusError
+		result.ErrorMessage = sb.String()
+	} else if failed > 0 {
+		result.Status = types.StatusFailure
+		result.ErrorMessage = sb.String()
+	} else {
+		result.Status = types.StatusSuccess
 	}
 }
 

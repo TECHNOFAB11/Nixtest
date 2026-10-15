@@ -6,6 +6,7 @@
   inherit (lib) evalModules toList;
 in rec {
   helpers = import ./testHelpers.nix {inherit lib;};
+  inherit (helpers) asserts expect;
 
   mkBinary = {
     nixtests,
