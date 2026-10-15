@@ -2,6 +2,14 @@
 All notable changes to this project will be documented in this file. See [conventional commits](https://www.conventionalcommits.org/) for commit guidelines.
 
 - - -
+## [v1.4.0](https://gitlab.com/TECHNOFAB/nixtest/compare/9481833a408dde6c2a87215a8a6952a1d5de424f..v1.4.0) - 2026-10-15
+#### Features
+- add new assertions test type - ([17d08b9](https://gitlab.com/TECHNOFAB/nixtest/commit/17d08b997511216cb84c4923f6f7b7d7233ec1da)) - [@TECHNOFAB](https://gitlab.com/TECHNOFAB)
+#### Bug Fixes
+- (**deps**) update module github.com/rs/zerolog to v1.35.1 - ([9481833](https://gitlab.com/TECHNOFAB/nixtest/commit/9481833a408dde6c2a87215a8a6952a1d5de424f)) - Renovate Bot
+
+- - -
+
 ## [v1.3.0](https://gitlab.com/TECHNOFAB/nixtest/compare/dab1e2ef6f49d91174216aed8216aa98f9a071ed..v1.3.0) - 2026-04-02
 #### Features
 - add support for running NixOS VM tests more easily - ([c64e0cc](https://gitlab.com/TECHNOFAB/nixtest/commit/c64e0cce0c5ba9d77597f20f002d1375deb8e577)) - [@TECHNOFAB](https://gitlab.com/TECHNOFAB)
