@@ -2,6 +2,12 @@
 All notable changes to this project will be documented in this file. See [conventional commits](https://www.conventionalcommits.org/) for commit guidelines.
 
 - - -
+## [v1.4.1](https://gitlab.com/TECHNOFAB/nixtest/compare/8a5d3d121986a7c81fc09a38d00e3d5f6b293e55..v1.4.1) - 2026-11-09
+#### Miscellaneous Chores
+- (**helpers**) make throws evaluate deeply & add toEval - ([8a5d3d1](https://gitlab.com/TECHNOFAB/nixtest/commit/8a5d3d121986a7c81fc09a38d00e3d5f6b293e55)) - [@TECHNOFAB](https://gitlab.com/TECHNOFAB)
+
+- - -
+
 ## [v1.4.0](https://gitlab.com/TECHNOFAB/nixtest/compare/9481833a408dde6c2a87215a8a6952a1d5de424f..v1.4.0) - 2026-10-15
 #### Features
 - add new assertions test type - ([17d08b9](https://gitlab.com/TECHNOFAB/nixtest/commit/17d08b997511216cb84c4923f6f7b7d7233ec1da)) - [@TECHNOFAB](https://gitlab.com/TECHNOFAB)
