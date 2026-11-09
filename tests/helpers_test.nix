@@ -27,6 +27,9 @@
           "isEmpty" = asserts.isEmpty [];
           "isNotEmpty" = asserts.isNotEmpty [1];
           "throws" = asserts.throws (throw "oops");
+          "throws nested" = asserts.throws {inner = throw "oops";};
+          "fails alias" = asserts.fails (throw "failed");
+          "toEval succeeds" = asserts.toEval {a = [1 2 3];};
           "raw boolean" = true;
           "expect alias" = expect.eq "foo" "foo";
         };

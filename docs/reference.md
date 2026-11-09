@@ -70,5 +70,6 @@ Assertion matchers for `type = "assertions"` tests (also available as `ntlib.hel
 - `matches regex str`: checks if a string matches the given regex pattern.
 - `isNull val` / `isNotNull`: null checks.
 - `isEmpty val` / `isNotEmpty`: checks if list, string, or attrset is empty / not empty.
-- `throws expr` / `fails`: asserts that evaluating `expr` throws or aborts.
+- `toEval expr` / `evals`: asserts that evaluating `expr` deeply succeeds without throwing or aborting.
+- `toNotEval expr` / `notEvals` / `throws` / `fails`: asserts that evaluating `expr` deeply throws or aborts (using `builtins.tryEval (builtins.deepSeq expr expr)`).
 - `custom cond message` / `that`: custom condition with failure explanation message.

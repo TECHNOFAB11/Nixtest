@@ -272,18 +272,33 @@ in rec {
         actual = val;
       };
 
-  throws = expr: let
-    res = builtins.tryEval expr;
+  toEval = expr: let
+    res = builtins.tryEval (builtins.deepSeq expr expr);
+  in
+    if res.success
+    then true
+    else
+      mkFailure {
+        message = "Expected expression to evaluate successfully, but it threw an error";
+        expected = "to evaluate";
+        actual = "evaluation failed (threw or aborted)";
+      };
+  evals = toEval;
+
+  toNotEval = expr: let
+    res = builtins.tryEval (builtins.deepSeq expr expr);
   in
     if !res.success
     then true
     else
       mkFailure {
-        message = "Expected expression to throw an error, but it succeeded";
-        expected = "to throw";
+        message = "Expected expression to fail evaluation, but it succeeded";
+        expected = "evaluation to fail (throw or abort)";
         actual = "evaluated to: ${formatVal res.value}";
       };
-  fails = throws;
+  notEvals = toNotEval;
+  throws = toNotEval;
+  fails = toNotEval;
 
   custom = cond: message:
     if cond
